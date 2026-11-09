@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="秋日暖阳与山丘的抽象插画">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3e8d4"/>
+      <stop offset=".55" stop-color="#ead9be"/>
+      <stop offset="1" stop-color="#dfc8a7"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9825f"/>
+      <stop offset="1" stop-color="#b64f36"/>
+    </linearGradient>
+    <linearGradient id="hillA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8e997b"/>
+      <stop offset="1" stop-color="#6d7962"/>
+    </linearGradient>
+    <linearGradient id="hillB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4f5a4a"/>
+      <stop offset="1" stop-color="#7a866b"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="838" cy="252" r="178" fill="#c86543" opacity=".18" filter="url(#soft)"/>
+  <circle cx="838" cy="252" r="138" fill="url(#sun)"/>
+  <path d="M0 610C166 520 276 554 410 596c154 48 260 12 406-44 129-49 257-24 384 22v326H0Z" fill="url(#hillA)" opacity=".9"/>
+  <path d="M0 704c194-78 348-49 526 4 170 51 330 33 674-58v250H0Z" fill="url(#hillB)"/>
+  <path d="M0 792c212-48 402-30 604 8 180 34 390 23 596-24v124H0Z" fill="#3e493d"/>
+  <g fill="none" stroke="#f5ead8" stroke-linecap="round" opacity=".46">
+    <path d="M80 660c138-52 244-32 354 4" stroke-width="3"/>
+    <path d="M720 698c136-36 258-25 396-46" stroke-width="3"/>
+    <path d="M0 596c130-61 238-49 366-4" stroke-width="2"/>
+  </g>
+  <g stroke="#3b4436" stroke-width="6" fill="none" stroke-linecap="round">
+    <path d="M166 668c-2-124 18-211 76-292"/>
+    <path d="M214 493c39-27 78-35 116-33"/>
+    <path d="M222 554c-29-26-52-56-63-93"/>
+    <path d="M196 611c44-18 84-17 122 5"/>
+  </g>
+  <g fill="#aa5a3c">
+    <ellipse cx="338" cy="448" rx="20" ry="9" transform="rotate(-18 338 448)"/>
+    <ellipse cx="286" cy="469" rx="18" ry="8" transform="rotate(14 286 469)"/>
+    <ellipse cx="152" cy="458" rx="19" ry="8" transform="rotate(-38 152 458)"/>
+    <ellipse cx="164" cy="552" rx="18" ry="8" transform="rotate(52 164 552)"/>
+    <ellipse cx="314" cy="610" rx="20" ry="9" transform="rotate(9 314 610)"/>
+    <ellipse cx="360" cy="518" rx="16" ry="7" transform="rotate(-48 360 518)"/>
+  </g>
+  <g fill="#f1e2cb" opacity=".85">
+    <circle cx="1042" cy="646" r="5"/>
+    <circle cx="1090" cy="618" r="3"/>
+    <circle cx="980" cy="680" r="4"/>
+    <circle cx="1132" cy="666" r="3"/>
+  </g>
+  <path d="M973 344c31-24 66-23 101 0" fill="none" stroke="#f6ecdc" stroke-width="3" opacity=".65"/>
+  <path d="M984 373c22-15 45-15 68 0" fill="none" stroke="#f6ecdc" stroke-width="2.4" opacity=".5"/>
+  <rect width="1200" height="900" filter="url(#grain)" opacity=".08" style="mix-blend-mode:multiply"/>
+</svg>

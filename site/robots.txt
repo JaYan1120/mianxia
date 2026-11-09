@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jayan1120.github.io/mianxia/sitemap.xml

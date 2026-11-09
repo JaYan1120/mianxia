@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>眠夏</title>
+    <link>https://jayan1120.github.io/mianxia/</link>
+    <description>一个用来记录想法、光影与日常的个人空间。慢一点，写下来。</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 09 Nov 2026 19:26:47 GMT</lastBuildDate>
+    <atom:link href="https://jayan1120.github.io/mianxia/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+    <title>关于「记录」这件事</title>
+    <link>https://jayan1120.github.io/mianxia/post/why-we-write/</link>
+    <guid isPermaLink="true">https://jayan1120.github.io/mianxia/post/why-we-write/</guid>
+    <pubDate>Fri, 09 Oct 2026 15:15:00 GMT</pubDate>
+    <category>思考</category>
+    <description>我们为什么要在没有人催促的情况下，主动写下一些东西？也许是因为，记录本身就是一种理解生活的方式。</description>
+  </item>
+  </channel>
+</rss>

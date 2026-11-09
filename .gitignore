@@ -1,0 +1,9 @@
+data/
+*.log
+node_modules/
+.DS_Store
+Thumbs.db
+.publish-*
+site-preview-*.png
+static-preview*.png
+static-diag*.mjs

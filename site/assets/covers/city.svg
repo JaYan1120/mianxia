@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="黄昏城市街道的抽象插画">
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9b38e"/>
+      <stop offset=".42" stop-color="#d69076"/>
+      <stop offset=".72" stop-color="#8e7080"/>
+      <stop offset="1" stop-color="#4e5668"/>
+    </linearGradient>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6f6472"/>
+      <stop offset="1" stop-color="#4e4b5b"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d3b47"/>
+      <stop offset="1" stop-color="#292a33"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#dusk)"/>
+  <circle cx="805" cy="286" r="98" fill="#f6d4a6" opacity=".82"/>
+  <circle cx="805" cy="286" r="130" fill="none" stroke="#f7ddbb" stroke-width="2" opacity=".35"/>
+  <g fill="#5c5664" opacity=".75">
+    <path d="M0 530V386h82v-52h64v196h74V342h96v188h82V300h74v230Z"/>
+    <path d="M900 530V360h58v-42h86v212h64V330h92v200Z"/>
+  </g>
+  <g fill="#f4c988" opacity=".85">
+    <rect x="25" y="426" width="17" height="22"/><rect x="64" y="428" width="17" height="22"/>
+    <rect x="96" y="394" width="17" height="20"/><rect x="128" y="394" width="17" height="20"/>
+    <rect x="189" y="420" width="18" height="20"/><rect x="225" y="452" width="18" height="20"/>
+    <rect x="281" y="387" width="16" height="19"/><rect x="313" y="418" width="16" height="19"/>
+    <rect x="405" y="360" width="18" height="21"/><rect x="441" y="394" width="18" height="21"/>
+    <rect x="952" y="407" width="17" height="20"/><rect x="1000" y="376" width="17" height="20"/>
+    <rect x="1068" y="420" width="17" height="20"/><rect x="1105" y="448" width="17" height="20"/>
+  </g>
+  <path d="M0 530h1200v370H0Z" fill="url(#front)"/>
+  <path d="M0 618c208-38 356-14 542 41 199 59 386 45 658-21v262H0Z" fill="#34343d"/>
+  <path d="M0 720c254-47 438-11 634 38 195 49 370 26 566-22v164H0Z" fill="#262730"/>
+  <path d="M500 900c16-126 53-225 105-292 38-48 94-72 165-70-44 34-74 73-92 118-30 74-37 156-25 244Z" fill="#57515c" opacity=".58"/>
+  <g stroke="#e4b283" stroke-width="3" opacity=".45">
+    <path d="M592 900c16-135 54-241 108-315"/>
+    <path d="M724 900c-2-136 23-242 74-316"/>
+  </g>
+  <g stroke="#292a32" stroke-width="8" stroke-linecap="round">
+    <path d="M152 620v310M1040 628v302"/>
+  </g>
+  <g fill="#f4c988">
+    <circle cx="152" cy="620" r="16"/>
+    <circle cx="1040" cy="628" r="16"/>
+  </g>
+  <g stroke="#e4b283" fill="none" opacity=".4">
+    <path d="M182 781c22-18 43-18 64 0M943 758c20-16 39-16 58 0" stroke-width="2.4"/>
+    <path d="M218 826c16-13 32-13 48 0M902 813c15-12 30-12 45 0" stroke-width="2"/>
+  </g>
+  <g fill="#2b2c35">
+    <path d="M372 466c3-22 10-42 21-60 12 19 18 39 20 60Z"/>
+    <path d="M413 468c2-17 8-33 17-47 9 15 14 31 15 47Z"/>
+  </g>
+  <g stroke="#3b3a43" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M232 548c-5-68 3-114 28-149"/>
+    <path d="M260 399c-26-6-44-21-51-44 26-5 45 6 51 44Z" fill="#4f5d55" stroke="none"/>
+    <path d="M251 438c27-10 47-31 55-60-28-2-49 14-55 60Z" fill="#5f6c5f" stroke="none"/>
+  </g>
+  <rect width="1200" height="900" filter="url(#grain)" opacity=".11" style="mix-blend-mode:multiply"/>
+</svg>

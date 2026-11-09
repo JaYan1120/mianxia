@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#bc5c42"/>
+      <stop offset="1" stop-color="#98442f"/>
+    </linearGradient>
+  </defs>
+  <rect width="72" height="72" rx="18" fill="url(#bg)"/>
+  <rect x="8" y="8" width="56" height="56" rx="12" fill="none" stroke="#f6ead8" stroke-opacity=".45"/>
+  <text x="36" y="50" text-anchor="middle" font-family="Songti SC, STSong, serif" font-size="38" fill="#f8eddc">眠</text>
+</svg>
