@@ -124,11 +124,23 @@
       ['meta[name="description"]', 'meta[name="description"]', 'content'],
       ['meta[property="og:title"]', 'meta[property="og:title"]', 'content'],
       ['meta[property="og:description"]', 'meta[property="og:description"]', 'content'],
-      ['meta[property="og:type"]', 'meta[property="og:type"]', 'content']
+      ['meta[property="og:type"]', 'meta[property="og:type"]', 'content'],
+      ['meta[property="og:site_name"]', 'meta[property="og:site_name"]', 'content'],
+      ['meta[property="og:url"]', 'meta[property="og:url"]', 'content'],
+      ['meta[property="og:image"]', 'meta[property="og:image"]', 'content'],
+      ['meta[name="twitter:card"]', 'meta[name="twitter:card"]', 'content'],
+      ['meta[name="twitter:title"]', 'meta[name="twitter:title"]', 'content'],
+      ['meta[name="twitter:description"]', 'meta[name="twitter:description"]', 'content'],
+      ['meta[name="twitter:image"]', 'meta[name="twitter:image"]', 'content'],
+      ['meta[property="article:published_time"]', 'meta[property="article:published_time"]', 'content'],
+      ['meta[property="article:modified_time"]', 'meta[property="article:modified_time"]', 'content']
     ];
     metas.forEach(([currentSelector, nextSelector, attribute]) => {
       const next = doc.querySelector(nextSelector);
-      if (!next) return;
+      if (!next) {
+        document.querySelector(currentSelector)?.remove();
+        return;
+      }
       let current = document.querySelector(currentSelector);
       if (!current) {
         current = document.createElement('meta');
@@ -149,6 +161,19 @@
       currentCanonical.href = new URL(nextCanonical.getAttribute('href') || targetUrl.href, targetUrl.href).href;
     } else if (currentCanonical) {
       currentCanonical.remove();
+    }
+    const nextLd = doc.querySelector('#post-jsonld');
+    let currentLd = document.getElementById('post-jsonld');
+    if (nextLd) {
+      if (!currentLd) {
+        currentLd = document.createElement('script');
+        currentLd.type = 'application/ld+json';
+        currentLd.id = 'post-jsonld';
+        document.head.appendChild(currentLd);
+      }
+      currentLd.textContent = nextLd.textContent;
+    } else if (currentLd) {
+      currentLd.remove();
     }
   }
 
@@ -181,6 +206,7 @@
   function openOverlay(overlay) {
     if (!overlay) return;
     closeOverlays(overlay);
+    overlay._returnFocus = document.activeElement;
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
     lockBody(true);
@@ -193,6 +219,11 @@
     overlay.classList.remove('is-open');
     overlay.setAttribute('aria-hidden', 'true');
     if (!$$('.modal-overlay.is-open').length) lockBody(false);
+    const returnFocus = overlay._returnFocus;
+    overlay._returnFocus = null;
+    if (returnFocus && document.contains(returnFocus)) {
+      setTimeout(() => returnFocus.focus({ preventScroll: true }), 30);
+    }
   }
 
   function closeOverlays(except) {
@@ -205,6 +236,21 @@
     $$('.modal-overlay').forEach((overlay) => {
       overlay.addEventListener('mousedown', (event) => {
         if (event.target === overlay) closeOverlay(overlay);
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key !== 'Tab') return;
+        const focusables = $$('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])', overlay)
+          .filter((node) => node.offsetParent !== null);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       });
     });
     $$('[data-static-menu]').forEach((button) => {
@@ -575,6 +621,12 @@
         }
         window.scrollTo({ top: scrollTarget, behavior: 'auto' });
       });
+      const nextMainFocus = document.getElementById('main');
+      if (nextMainFocus) {
+        if (!nextMainFocus.hasAttribute('tabindex')) nextMainFocus.tabIndex = -1;
+        nextMainFocus.focus({ preventScroll: true });
+      }
+      document.dispatchEvent(new CustomEvent('mianxia:page-ready'));
       document.documentElement.classList.remove('is-pjax-loading');
       pjaxController = null;
     } catch (error) {
