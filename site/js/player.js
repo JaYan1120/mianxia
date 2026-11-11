@@ -9,7 +9,8 @@
     time: 'mianxia:music:time',
     volume: 'mianxia:music:volume',
     mode: 'mianxia:music:mode',
-    side: 'mianxia:music:side'
+    side: 'mianxia:music:side',
+    order: 'mianxia:music:order'
   };
 
   const MODES = [
@@ -30,7 +31,9 @@
     volume: '<path d="M4 10v4h4l5 4V6l-5 4ZM17 9a5 5 0 0 1 0 6M19.5 6.5a9 9 0 0 1 0 11"/>',
     repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
     shuffle: '<path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
-    order: '<path d="M4 6h16M4 12h16M4 18h16M18 4l2 2-2 2M18 16l2 2-2 2"/>'
+    order: '<path d="M4 6h16M4 12h16M4 18h16M18 4l2 2-2 2M18 16l2 2-2 2"/>',
+    up: '<path d="m6 15 6-6 6 6"/>',
+    down: '<path d="m6 9 6 6 6-6"/>'
   };
 
   const svg = (name, size = 17) => `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.music}</svg>`;
@@ -102,6 +105,8 @@
   const fabButton = root.querySelector('[data-music-fab]');
   const closeButton = root.querySelector('[data-music-close]');
   const embedded = Array.isArray(window.__MIANXIA_MUSIC__) ? window.__MIANXIA_MUSIC__ : null;
+  const mediaSession = 'mediaSession' in navigator ? navigator.mediaSession : null;
+  const mediaAlbum = document.querySelector('meta[property="og:site_name"]')?.content || '眠夏';
 
   let songs = [];
   let currentIndex = -1;
@@ -114,6 +119,8 @@
   let peekTimer = null;
   let suppressFabClick = false;
   let dragState = null;
+  let randomHistory = [];
+  let lastMediaPositionUpdate = 0;
 
   const normalizeSongs = (list) => (Array.isArray(list) ? list : [])
     .filter((song) => song && song.title && song.url)
@@ -137,6 +144,25 @@
     }
   };
 
+  const applySavedOrder = () => {
+    if (songs.length < 2) return;
+    let ids = [];
+    try { ids = JSON.parse(readStorage(STORAGE.order, '[]')); } catch { return; }
+    if (!Array.isArray(ids) || !ids.length) return;
+    const positions = new Map(ids.map((id, index) => [String(id), index]));
+    songs.sort((a, b) => {
+      const ai = positions.has(a.id) ? positions.get(a.id) : Number.MAX_SAFE_INTEGER;
+      const bi = positions.has(b.id) ? positions.get(b.id) : Number.MAX_SAFE_INTEGER;
+      return ai - bi;
+    });
+  };
+
+  const saveOrder = () => {
+    try {
+      localStorage.setItem(STORAGE.order, JSON.stringify(songs.map((song) => song.id)));
+    } catch { /* ignore */ }
+  };
+
   const saveTrack = () => {
     if (currentIndex < 0 || !songs[currentIndex]) return;
     try {
@@ -145,12 +171,52 @@
     } catch { /* ignore */ }
   };
 
+  const updateMediaMetadata = () => {
+    if (!mediaSession) return;
+    const song = songs[currentIndex];
+    if (!song) {
+      mediaSession.metadata = null;
+      mediaSession.playbackState = 'none';
+      return;
+    }
+    if ('MediaMetadata' in window) {
+      mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.artist || '未知艺术家',
+        album: mediaAlbum
+      });
+    }
+    updateMediaPlaybackState();
+    updateMediaPosition(true);
+  };
+
+  const updateMediaPlaybackState = () => {
+    if (!mediaSession) return;
+    mediaSession.playbackState = !songs.length ? 'none' : (audio.paused || audio.ended ? 'paused' : 'playing');
+  };
+
+  const updateMediaPosition = (force = false) => {
+    if (!mediaSession || !('setPositionState' in mediaSession)) return;
+    if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    const now = Date.now();
+    if (!force && now - lastMediaPositionUpdate < 900) return;
+    lastMediaPositionUpdate = now;
+    try {
+      mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate || 1,
+        position: Math.min(Math.max(audio.currentTime || 0, 0), audio.duration)
+      });
+    } catch { /* ignore unsupported state */ }
+  };
+
   const updatePlayButton = () => {
     const playing = !audio.paused && !audio.ended;
     playButton.innerHTML = svg(playing ? 'pause' : 'play', 15);
     playButton.setAttribute('aria-label', playing ? '暂停' : '播放');
     playButton.title = playing ? '暂停' : '播放';
     root.classList.toggle('is-playing', playing);
+    updateMediaPlaybackState();
   };
 
   const currentMode = () => MODES.find((item) => item.id === mode) || MODES[0];
@@ -171,6 +237,7 @@
   const cycleMode = () => {
     const index = MODES.findIndex((item) => item.id === mode);
     mode = MODES[(index + 1) % MODES.length].id;
+    randomHistory = [];
     try { localStorage.setItem(STORAGE.mode, mode); } catch { /* ignore */ }
     renderMode();
   };
@@ -211,15 +278,21 @@
 
   const randomIndex = () => {
     if (songs.length < 2) return 0;
-    let next = currentIndex;
-    while (next === currentIndex) next = Math.floor(Math.random() * songs.length);
-    return next;
+    const recent = new Set(randomHistory.slice(-Math.min(4, songs.length - 1)));
+    const candidates = songs
+      .map((_, index) => index)
+      .filter((index) => index !== currentIndex && !recent.has(index));
+    const pool = candidates.length ? candidates : songs.map((_, index) => index).filter((index) => index !== currentIndex);
+    return pool[Math.floor(Math.random() * pool.length)] ?? 0;
   };
 
   const stepIndex = (direction) => {
     if (!songs.length) return 0;
     if (currentIndex < 0) return direction > 0 ? 0 : songs.length - 1;
-    if (mode === 'random' && songs.length > 1) return randomIndex();
+    if (mode === 'random' && songs.length > 1) {
+      if (direction < 0 && randomHistory.length) return randomHistory.pop();
+      return randomIndex();
+    }
     return ((currentIndex + direction) % songs.length + songs.length) % songs.length;
   };
 
@@ -228,18 +301,35 @@
     if (!song) {
       titleNode.textContent = '还没有歌曲';
       artistNode.textContent = '添加一首歌，让这里响起来';
+      updateMediaMetadata();
       return;
     }
     titleNode.textContent = song.title;
     artistNode.textContent = song.artist || '未知艺术家';
     titleNode.title = song.title;
+    updateMediaMetadata();
+  };
+
+  const moveSong = (from, direction) => {
+    const to = from + direction;
+    if (to < 0 || to >= songs.length) return;
+    const currentId = songs[currentIndex] && songs[currentIndex].id;
+    const [moved] = songs.splice(from, 1);
+    songs.splice(to, 0, moved);
+    if (currentId) currentIndex = songs.findIndex((song) => song.id === currentId);
+    randomHistory = [];
+    saveOrder();
+    renderPlaylist();
   };
 
   const renderPlaylist = () => {
+    const scrollTop = tracksNode.scrollTop;
     tracksNode.innerHTML = '';
     countNode.textContent = `${songs.length} 首`;
     playlistCountNode.textContent = `${songs.length} 首`;
     songs.forEach((song, index) => {
+      const row = document.createElement('div');
+      row.className = 'music-track-row';
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'music-track';
@@ -254,8 +344,36 @@
           selectTrack(index, { autoplay: true });
         }
       });
-      tracksNode.appendChild(button);
+
+      const moveControls = document.createElement('span');
+      moveControls.className = 'music-track-move';
+      const up = document.createElement('button');
+      up.type = 'button';
+      up.className = 'music-track-move-btn';
+      up.disabled = index === 0;
+      up.setAttribute('aria-label', `上移 ${song.title}`);
+      up.title = '上移';
+      up.innerHTML = svg('up', 12);
+      up.addEventListener('click', (event) => {
+        event.stopPropagation();
+        moveSong(index, -1);
+      });
+      const down = document.createElement('button');
+      down.type = 'button';
+      down.className = 'music-track-move-btn';
+      down.disabled = index === songs.length - 1;
+      down.setAttribute('aria-label', `下移 ${song.title}`);
+      down.title = '下移';
+      down.innerHTML = svg('down', 12);
+      down.addEventListener('click', (event) => {
+        event.stopPropagation();
+        moveSong(index, 1);
+      });
+      moveControls.append(up, down);
+      row.append(button, moveControls);
+      tracksNode.appendChild(row);
     });
+    tracksNode.scrollTop = scrollTop;
   };
 
   const updateTimeline = () => {
@@ -271,7 +389,12 @@
     const normalized = ((index % songs.length) + songs.length) % songs.length;
     const song = songs[normalized];
     if (!song) return;
+    const previousIndex = currentIndex;
     const wasPlaying = !audio.paused && !audio.ended;
+    if (mode === 'random' && !options.fromHistory && previousIndex >= 0 && previousIndex !== normalized) {
+      randomHistory.push(previousIndex);
+      if (randomHistory.length > 30) randomHistory.shift();
+    }
     audio.pause();
     currentIndex = normalized;
     pendingSeek = Math.max(0, Number(options.time) || 0);
@@ -315,6 +438,8 @@
     const wasPlaying = !audio.paused && !audio.ended;
     const previousTime = audio.currentTime || 0;
     songs = normalizeSongs(list);
+    applySavedOrder();
+    randomHistory = [];
     root.hidden = songs.length === 0;
     if (!songs.length) {
       audio.pause();
@@ -383,16 +508,20 @@
       pendingSeek = 0;
     }
     updateTimeline();
+    updateMediaPosition(true);
   });
   audio.addEventListener('durationchange', updateTimeline);
   audio.addEventListener('timeupdate', () => {
     updateTimeline();
+    updateMediaPosition();
     const now = Date.now();
     if (now - lastTimeSave > 4000) {
       lastTimeSave = now;
       saveTrack();
     }
   });
+  audio.addEventListener('seeked', () => updateMediaPosition(true));
+  audio.addEventListener('ratechange', () => updateMediaPosition(true));
   audio.addEventListener('play', () => {
     updatePlayButton();
     saveTrack();
@@ -429,6 +558,7 @@
     if (!Number.isFinite(audio.duration)) return;
     audio.currentTime = Math.min(Number(seek.value) || 0, audio.duration);
     updateTimeline();
+    updateMediaPosition(true);
   });
   volumeInput.addEventListener('input', () => {
     const value = Math.min(1, Math.max(0, Number(volumeInput.value) || 0));
@@ -518,7 +648,7 @@
     closeButton.addEventListener('click', () => setPlayerOpen(false));
   }
   if (modeButton) modeButton.addEventListener('click', cycleMode);
-  prevButton.addEventListener('click', () => selectTrack(stepIndex(-1), { autoplay: true }));
+  prevButton.addEventListener('click', () => selectTrack(stepIndex(-1), { autoplay: true, fromHistory: true }));
   nextButton.addEventListener('click', () => selectTrack(stepIndex(1), { autoplay: true }));
   listToggle.addEventListener('click', () => {
     const next = playlist.hidden;
@@ -550,6 +680,44 @@
     setSongs: (list) => setSongs(list),
     getSongs: () => songs.slice()
   };
+
+  if (mediaSession) {
+    const setHandler = (action, handler) => {
+      try { mediaSession.setActionHandler(action, handler); } catch { /* unsupported action */ }
+    };
+    setHandler('play', () => {
+      if (!songs.length) return;
+      if (currentIndex < 0) selectTrack(0, { autoplay: true });
+      else audio.play().catch(() => updatePlayButton());
+    });
+    setHandler('pause', () => audio.pause());
+    setHandler('previoustrack', () => {
+      if (songs.length) selectTrack(stepIndex(-1), { autoplay: true, fromHistory: true });
+    });
+    setHandler('nexttrack', () => {
+      if (songs.length) selectTrack(stepIndex(1), { autoplay: true });
+    });
+    setHandler('seekbackward', (details = {}) => {
+      audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 10));
+      updateMediaPosition(true);
+    });
+    setHandler('seekforward', (details = {}) => {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : audio.currentTime + 10;
+      audio.currentTime = Math.min(duration, audio.currentTime + (details.seekOffset || 10));
+      updateMediaPosition(true);
+    });
+    setHandler('seekto', (details = {}) => {
+      if (!Number.isFinite(details.seekTime)) return;
+      if (details.fastSeek && typeof audio.fastSeek === 'function') audio.fastSeek(details.seekTime);
+      else audio.currentTime = details.seekTime;
+      updateMediaPosition(true);
+    });
+    setHandler('stop', () => {
+      audio.pause();
+      audio.currentTime = 0;
+      updateMediaPosition(true);
+    });
+  }
 
   loadSongs();
 })();
