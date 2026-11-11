@@ -2132,6 +2132,16 @@ html[data-theme="dark"] .tag-pill {
   display: none;
 }
 
+.music-audio {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .music-fab {
   position: relative;
   display: grid;
@@ -3278,6 +3288,267 @@ html[data-theme="dark"] .site-footer {
   font-size: 14px;
   line-height: 2;
   color: var(--ink-soft);
+}
+
+.about-music {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.055), var(--card-soft));
+}
+
+.about-music-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.about-music-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1px solid rgb(var(--accent-rgb) / 0.22);
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb) / 0.08);
+  color: var(--accent-link);
+}
+
+.about-music-head .eyebrow {
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+.about-music-head h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.about-music > p {
+  margin-top: 12px;
+  font-family: var(--font-reading);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+
+.about-music-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.about-music-points > div {
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(255 252 246 / 0.52);
+}
+
+html[data-theme="dark"] .about-music-points > div {
+  background: rgb(255 255 255 / 0.025);
+}
+
+.about-music-points span {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 8px;
+  color: var(--accent-link);
+}
+
+.about-music-points strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.about-music-points p {
+  margin-top: 3px;
+  font-size: 9.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.about-music-note {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 9.5px !important;
+  color: var(--muted) !important;
+}
+
+.about-contact-link {
+  border-style: dashed !important;
+}
+
+.about-contact {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgb(var(--accent-rgb) / 0.05), var(--card-soft));
+}
+
+.about-contact-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.about-contact-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1px solid rgb(var(--accent-rgb) / 0.22);
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb) / 0.08);
+  color: var(--accent-link);
+}
+
+.about-contact-head .eyebrow {
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+.about-contact-head h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.about-contact > p {
+  margin-top: 12px;
+  font-family: var(--font-reading);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+
+.contact-form {
+  margin-top: 17px;
+}
+
+.contact-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.contact-form .field {
+  margin-bottom: 0;
+}
+
+.contact-form > .field {
+  margin-top: 13px;
+}
+
+.contact-form .input {
+  background: rgb(255 252 246 / 0.5);
+}
+
+html[data-theme="dark"] .contact-form .input {
+  background: rgb(255 255 255 / 0.035);
+}
+
+.contact-textarea {
+  min-height: 126px;
+  padding: 11px 13px;
+  line-height: 1.75;
+  resize: vertical;
+}
+
+.contact-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.contact-form-foot p {
+  max-width: 60%;
+  font-size: 9.5px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.contact-submit {
+  flex: none;
+}
+
+.contact-status {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card-soft);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.contact-status[data-state="success"] {
+  border-color: rgb(var(--accent-rgb) / 0.24);
+  background: rgb(var(--accent-rgb) / 0.07);
+  color: var(--accent-link);
+}
+
+.contact-status[data-state="error"] {
+  border-color: rgb(160 62 47 / 0.25);
+  background: rgb(160 62 47 / 0.06);
+  color: #a03e2f;
+}
+
+html[data-theme="dark"] .contact-status[data-state="error"] {
+  color: #e5a294;
+}
+
+@media (max-width: 800px) {
+  .about-music {
+    padding: 16px;
+  }
+
+  .about-music-points {
+    grid-template-columns: 1fr;
+  }
+
+  .about-contact {
+    padding: 16px;
+  }
+
+  .contact-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form-foot {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contact-form-foot p {
+    max-width: none;
+  }
+
+  .contact-submit {
+    width: 100%;
+  }
 }
 
 .about-notes {

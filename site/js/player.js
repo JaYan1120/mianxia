@@ -36,9 +36,9 @@
   const svg = (name, size = 17) => `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.music}</svg>`;
 
   root.innerHTML = `
+    <audio class="music-audio" data-music-audio preload="metadata"></audio>
     <button type="button" class="music-fab" data-music-fab aria-label="打开播放器" aria-expanded="false">${svg('music', 22)}</button>
     <div class="music-player-card">
-      <audio data-music-audio preload="metadata"></audio>
       <button type="button" class="music-close" data-music-close aria-label="收起播放器" title="收起播放器">${svg('close', 14)}</button>
       <div class="music-player-main">
         <button type="button" class="music-disc" data-music-toggle title="播放 / 暂停" aria-label="播放 / 暂停">${svg('music', 19)}</button>

@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="../css/styles.css">
   <script defer src="../js/static.js"></script>
   <script defer src="../js/player.js"></script>
+  <script defer src="../js/contact.js"></script>
   <noscript><style>.reveal{opacity:1;transform:none}</style></noscript>
 </head>
 <body data-root="../" data-page="about" class="">
@@ -49,13 +50,49 @@
       <div class="eyebrow"><span class="eyebrow-line"></span>ABOUT THE AUTHOR</div>
       <h1>再瞓一夏</h1>
       <p class="about-bio">写字，也收集生活里细小的光。喜欢纸质书、雨天，和没有目的地的散步。</p>
-      <div class="about-socials"></div>
+      <div class="about-socials"><a class="about-contact-link" href="#contact">写信给我 <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a></div>
     </aside>
     <div class="about-content">
       <header class="about-header reveal"><div class="eyebrow"><span class="eyebrow-line"></span>HELLO, STRANGER</div><h2>把日子，写成可以重读的光。</h2><p>一个用来记录想法、光影与日常的个人空间。慢一点，写下来。</p></header>
       <blockquote class="about-quote reveal"><span class="quote-mark">“</span><p>记录不是为了留住时间，而是为了在时间里留下自己。</p></blockquote>
-      <div class="about-stats reveal"><div><strong>2</strong><span>篇笔记</span></div><div><strong>565</strong><span>字记录</span></div><div><strong>2</strong><span>个标签</span></div><div><strong>425</strong><span>次阅读</span></div></div>
+      <div class="about-stats reveal"><div><strong>2</strong><span>篇笔记</span></div><div><strong>565</strong><span>字记录</span></div><div><strong>2</strong><span>个标签</span></div><div><strong>426</strong><span>次阅读</span></div></div>
       <div class="about-story reveal"><h3>关于这个博客</h3><p>「眠夏」是一个用来记录想法、光影与日常的个人空间。这里没有算法推荐，也没有更新频率的承诺，只有一些被认真写下来的片刻。</p><p>我相信文字有让时间变慢的能力。读一本书、走一段路、整理一张书桌，这些微小的事情值得被记住。如果这些文字恰好也能给你一点安静，那就更好了。</p></div>
+      <div class="about-music reveal">
+        <div class="about-music-head">
+          <span class="about-music-icon"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+          <div><div class="eyebrow"><span class="eyebrow-line"></span>THE SOUNDTRACK</div><h3>这里的音乐</h3></div>
+        </div>
+        <p>这里还放着一个小小的全站音乐播放器。它平时收在页面右下角，像一枚不着急播放的唱片；点开之后，可以切歌、调音量、拖动进度，也能在列表循环、单曲循环、随机和顺序播放之间切换。</p>
+        <p>站内切换页面时，音乐不会断。它会记住当前歌曲、播放进度、音量和循环模式；桌面和手机上都可以把唱片拖到左右两侧，停靠后自动半隐藏，尽量不挡住正在读的文字。</p>
+        <div class="about-music-points">
+          <div><span>01</span><strong>随手打开</strong><p>右下角的悬浮唱片，点击展开完整播放器。</p></div>
+          <div><span>02</span><strong>不停下来</strong><p>站内翻页只替换内容，播放器与音频不会被重建。</p></div>
+          <div><span>03</span><strong>安静待着</strong><p>左右吸附、半隐藏，需要时再让它出来。</p></div>
+        </div>
+        <p class="about-music-note">首次播放需要亲手点一下；离开网站或完整刷新页面时，音乐仍会停止。</p>
+      </div>
+      <div class="about-contact reveal" id="contact">
+        <div class="about-contact-head">
+          <span class="about-contact-icon"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+          <div><div class="eyebrow"><span class="eyebrow-line"></span>SAY HELLO</div><h3>写一封信</h3></div>
+        </div>
+        <p>不用很正式。聊聊最近读的书、走过的路，或者某个突然想被记住的下午。</p>
+        <form class="contact-form" data-contact-form novalidate>
+          <div class="contact-form-grid">
+            <label class="field"><span class="field-label">怎么称呼你</span><input class="input" type="text" name="name" maxlength="60" autocomplete="name" placeholder="你的名字或昵称" required></label>
+            <label class="field"><span class="field-label">你的邮箱</span><input class="input" type="email" name="email" maxlength="120" autocomplete="email" inputmode="email" placeholder="方便我回信" required></label>
+          </div>
+          <label class="field"><span class="field-label">想说的话</span><textarea class="input contact-textarea" name="message" rows="4" maxlength="4000" placeholder="慢慢写，不着急。" required></textarea></label>
+          <div class="contact-honeypot" aria-hidden="true"><label>Website<input type="text" name="botcheck" tabindex="-1" autocomplete="off"></label></div>
+          <input type="hidden" name="subject" value="来自眠夏博客的留言">
+          <input type="hidden" name="from_name" value="眠夏博客">
+          <div class="contact-form-foot">
+            <p>邮箱只用于回信，不会公开。提交后不会离开当前页面。</p>
+            <button type="submit" class="btn btn-primary contact-submit"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> 发送邮件</button>
+          </div>
+          <p class="contact-status" data-contact-status role="status" aria-live="polite" hidden></p>
+        </form>
+      </div>
       <div class="about-notes reveal"><div class="about-note"><span class="note-number">01</span><h4>关于写作</h4><p>不定期更新。想写的时候写，写不下去的时候就停一停。</p></div><div class="about-note"><span class="note-number">02</span><h4>关于图片</h4><p>站内插图多为日常记录与手绘，请勿随意转载。</p></div><div class="about-note"><span class="note-number">03</span><h4>关于联系</h4><p>欢迎写信，聊聊书、城市，或者某个无所事事的下午。</p></div></div>
       <div class="about-sign reveal"><span>再瞓一夏</span><i></i><span>2026</span></div>
     </div>
