@@ -8,7 +8,8 @@
     track: 'mianxia:music:track',
     time: 'mianxia:music:time',
     volume: 'mianxia:music:volume',
-    mode: 'mianxia:music:mode'
+    mode: 'mianxia:music:mode',
+    side: 'mianxia:music:side'
   };
 
   const MODES = [
@@ -35,8 +36,10 @@
   const svg = (name, size = 17) => `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.music}</svg>`;
 
   root.innerHTML = `
+    <button type="button" class="music-fab" data-music-fab aria-label="打开播放器" aria-expanded="false">${svg('music', 22)}</button>
     <div class="music-player-card">
       <audio data-music-audio preload="metadata"></audio>
+      <button type="button" class="music-close" data-music-close aria-label="收起播放器" title="收起播放器">${svg('close', 14)}</button>
       <div class="music-player-main">
         <button type="button" class="music-disc" data-music-toggle title="播放 / 暂停" aria-label="播放 / 暂停">${svg('music', 19)}</button>
         <div class="music-info">
@@ -96,6 +99,8 @@
   const modeIcon = root.querySelector('[data-music-mode-icon]');
   const modeLabel = root.querySelector('[data-music-mode-label]');
   const volumeInput = root.querySelector('.music-volume input');
+  const fabButton = root.querySelector('[data-music-fab]');
+  const closeButton = root.querySelector('[data-music-close]');
   const embedded = Array.isArray(window.__MIANXIA_MUSIC__) ? window.__MIANXIA_MUSIC__ : null;
 
   let songs = [];
@@ -103,6 +108,12 @@
   let pendingSeek = 0;
   let lastTimeSave = 0;
   let mode = 'list';
+  let playerOpen = false;
+  let side = 'right';
+  let peeking = false;
+  let peekTimer = null;
+  let suppressFabClick = false;
+  let dragState = null;
 
   const normalizeSongs = (list) => (Array.isArray(list) ? list : [])
     .filter((song) => song && song.title && song.url)
@@ -162,6 +173,40 @@
     mode = MODES[(index + 1) % MODES.length].id;
     try { localStorage.setItem(STORAGE.mode, mode); } catch { /* ignore */ }
     renderMode();
+  };
+
+  const setPeeking = (value) => {
+    const next = Boolean(value) && !playerOpen && !dragState;
+    peeking = next;
+    root.classList.toggle('is-peeking', next);
+  };
+
+  const schedulePeek = (delay = 900) => {
+    clearTimeout(peekTimer);
+    if (playerOpen || dragState || !songs.length) return;
+    peekTimer = setTimeout(() => {
+      if (playerOpen || dragState) return;
+      const hovering = window.matchMedia('(hover: hover)').matches && fabButton.matches(':hover');
+      if (!hovering) setPeeking(true);
+    }, delay);
+  };
+
+  const setPlayerOpen = (open) => {
+    playerOpen = Boolean(open);
+    root.classList.toggle('is-open', playerOpen);
+    if (fabButton) {
+      fabButton.setAttribute('aria-expanded', String(playerOpen));
+      fabButton.setAttribute('aria-label', playerOpen ? '收起播放器' : '打开播放器');
+    }
+    if (playerOpen) {
+      clearTimeout(peekTimer);
+      setPeeking(false);
+    } else {
+      playlist.hidden = true;
+      listToggle.setAttribute('aria-expanded', 'false');
+      root.classList.remove('is-list-open');
+      schedulePeek(800);
+    }
   };
 
   const randomIndex = () => {
@@ -276,6 +321,7 @@
       audio.removeAttribute('src');
       audio.load();
       currentIndex = -1;
+      setPlayerOpen(false);
       renderNow();
       renderPlaylist();
       updateTimeline();
@@ -291,10 +337,12 @@
       renderNow();
       renderPlaylist();
       if (wasPlaying && audio.paused) audio.play().catch(() => {});
+      schedulePeek(1800);
       return;
     }
     const restoreTime = foundIndex > -1 ? Number(readStorage(STORAGE.time, '0')) || 0 : 0;
     selectTrack(foundIndex > -1 ? foundIndex : 0, { time: restoreTime, autoplay: false });
+    schedulePeek(1800);
   };
 
   const loadSongs = async () => {
@@ -321,6 +369,9 @@
   })();
   audio.volume = storedVolume;
   volumeInput.value = String(storedVolume);
+
+  side = readStorage(STORAGE.side, 'right') === 'left' ? 'left' : 'right';
+  root.dataset.side = side;
 
   const storedMode = readStorage(STORAGE.mode, 'list');
   mode = MODES.some((item) => item.id === storedMode) ? storedMode : 'list';
@@ -384,8 +435,88 @@
     audio.volume = value;
     try { localStorage.setItem(STORAGE.volume, String(value)); } catch { /* ignore */ }
   });
+
+  const finishFabDrag = (event) => {
+    if (!dragState) return;
+    const state = dragState;
+    dragState = null;
+    root.classList.remove('is-dragging');
+    try {
+      if (fabButton.hasPointerCapture?.(state.pointerId)) fabButton.releasePointerCapture(state.pointerId);
+    } catch { /* ignore */ }
+    if (!state.moved) return;
+    const rect = root.getBoundingClientRect();
+    const nextSide = rect.left + rect.width / 2 < window.innerWidth / 2 ? 'left' : 'right';
+    side = nextSide;
+    root.dataset.side = side;
+    root.style.left = '';
+    root.style.right = '';
+    try { localStorage.setItem(STORAGE.side, side); } catch { /* ignore */ }
+    suppressFabClick = true;
+    setTimeout(() => { suppressFabClick = false; }, 450);
+    schedulePeek(900);
+  };
+
+  const startFabDrag = (event) => {
+    if (playerOpen || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    clearTimeout(peekTimer);
+    setPeeking(false);
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startLeft: root.offsetLeft,
+      moved: false
+    };
+    try { fabButton.setPointerCapture(event.pointerId); } catch { /* ignore */ }
+  };
+
+  const moveFab = (event) => {
+    if (!dragState || event.pointerId !== dragState.pointerId) return;
+    const dx = event.clientX - dragState.startX;
+    if (!dragState.moved && Math.abs(dx) < 6) return;
+    if (!dragState.moved) {
+      dragState.moved = true;
+      root.classList.add('is-dragging');
+      clearTimeout(peekTimer);
+      setPeeking(false);
+    }
+    if (event.cancelable) event.preventDefault();
+    const width = root.offsetWidth || 56;
+    const maxLeft = Math.max(4, window.innerWidth - width - 4);
+    const left = Math.max(4, Math.min(maxLeft, dragState.startLeft + dx));
+    root.style.left = `${left}px`;
+    root.style.right = 'auto';
+  };
+
+  if (fabButton) {
+    fabButton.addEventListener('pointerdown', startFabDrag);
+    fabButton.addEventListener('pointerenter', () => {
+      if (playerOpen) return;
+      clearTimeout(peekTimer);
+      setPeeking(false);
+    });
+    fabButton.addEventListener('pointerleave', () => {
+      if (!playerOpen && !dragState) schedulePeek(900);
+    });
+    fabButton.addEventListener('click', () => {
+      if (suppressFabClick) {
+        suppressFabClick = false;
+        return;
+      }
+      setPeeking(false);
+      setPlayerOpen(true);
+    });
+    fabButton.addEventListener('dragstart', (event) => event.preventDefault());
+    window.addEventListener('pointermove', moveFab);
+    window.addEventListener('pointerup', finishFabDrag);
+    window.addEventListener('pointercancel', finishFabDrag);
+  }
+
   playButton.addEventListener('click', togglePlay);
   toggleButton.addEventListener('click', togglePlay);
+  if (closeButton) {
+    closeButton.addEventListener('click', () => setPlayerOpen(false));
+  }
   if (modeButton) modeButton.addEventListener('click', cycleMode);
   prevButton.addEventListener('click', () => selectTrack(stepIndex(-1), { autoplay: true }));
   nextButton.addEventListener('click', () => selectTrack(stepIndex(1), { autoplay: true }));
@@ -399,6 +530,13 @@
     playlist.hidden = true;
     listToggle.setAttribute('aria-expanded', 'false');
     root.classList.remove('is-list-open');
+  });
+  document.addEventListener('click', (event) => {
+    if (!playerOpen || root.contains(event.target)) return;
+    setPlayerOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && playerOpen) setPlayerOpen(false);
   });
   document.addEventListener('click', (event) => {
     if (playlist.hidden || root.contains(event.target)) return;
