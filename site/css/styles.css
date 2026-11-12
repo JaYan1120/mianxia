@@ -213,15 +213,18 @@ pre {
   left: 10px;
   z-index: 999;
   padding: 10px 16px;
-  z-index: 999;
   background: var(--ink);
   color: var(--paper);
   border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(-160%);
   transition: transform 0.2s;
 }
 
-.skip-link:focus {
+html.keyboard-nav .skip-link:focus {
+  opacity: 1;
+  pointer-events: auto;
   transform: translateY(0);
 }
 
@@ -1131,15 +1134,73 @@ html[data-theme="dark"] .paper-shadow {
 }
 
 .hero-note {
-  position: absolute;
-  right: 0;
-  bottom: -25px;
+  position: relative;
+  margin-top: 18px;
   display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10px;
-  letter-spacing: 0.13em;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card-soft);
+  box-shadow: var(--shadow-sm);
+  font-size: 11px;
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+
+.hero-note .tiny-star {
+  flex: none;
+  margin-top: 3px;
+}
+
+.almanac-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.almanac-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.almanac-tag {
+  flex: none;
+  width: 20px;
+  text-align: center;
+  border-radius: 4px;
+  background: rgb(var(--accent-rgb) / 0.12);
+  color: var(--accent);
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+.almanac-tag-ji {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  color: var(--ink-soft);
+}
+
+.almanac-text {
+  color: var(--ink-soft);
+}
+
+.almanac-item {
+  white-space: nowrap;
+}
+
+.almanac-sep {
+  padding: 0 2px;
+  font-style: normal;
   color: var(--muted);
+  opacity: 0.7;
 }
 
 .tiny-star {
@@ -7932,7 +7993,7 @@ html[data-theme="dark"] .recovery-delete {
   }
 
   .hero-note {
-    bottom: -24px;
+    margin-top: 14px;
   }
 
   .home-layout {
@@ -8749,7 +8810,8 @@ html[data-theme="dark"] .recovery-delete {
   }
 
   .hero-note {
-    right: 5px;
+    padding: 8px 11px 9px;
+    font-size: 10px;
   }
 
   .setup-ribbon {

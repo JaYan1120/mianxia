@@ -7,3 +7,7 @@ Thumbs.db
 site-preview-*.png
 static-preview*.png
 static-diag*.mjs
+.desktop-cache/
+.webview2-cache/
+dist/
+.backups/

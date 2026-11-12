@@ -512,6 +512,14 @@
     };
     initFilters();
     initActions();
+    initAlmanac();
+  }
+
+  function initAlmanac() {
+    if (!$('[data-almanac]')) return;
+    import('./almanac.js')
+      .then((mod) => mod.hydrateAlmanac(document))
+      .catch(() => { /* 加载失败时保留原来的「星期X · 宜记录」 */ });
   }
 
   function initActions() {

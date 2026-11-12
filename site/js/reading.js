@@ -6,6 +6,13 @@
   let lightbox = null;
   let lastFocus = null;
 
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab') document.documentElement.classList.add('keyboard-nav');
+  }, true);
+  document.addEventListener('pointerdown', () => {
+    document.documentElement.classList.remove('keyboard-nav');
+  }, true);
+
   const escapeHtml = (value) => String(value == null ? '' : value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
