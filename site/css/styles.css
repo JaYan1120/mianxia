@@ -4722,6 +4722,30 @@ html[data-theme="dark"] .input {
   opacity: 0.72;
 }
 
+/* 原生下拉：深色模式下弹层默认是浅底，浅色字会看不清。
+   这里给下拉本身和列表项都写明底色，弹层才不会透出浅色。 */
+select.input,
+select.select {
+  background-color: #fbf5e9;
+}
+
+html[data-theme="dark"] select.input,
+html[data-theme="dark"] select.select {
+  background-color: #1d1a17;
+}
+
+select option,
+select optgroup {
+  background-color: #fbf5e9;
+  color: #29241d;
+}
+
+html[data-theme="dark"] select option,
+html[data-theme="dark"] select optgroup {
+  background-color: #1d1a17;
+  color: #f1e9dc;
+}
+
 .input:hover {
   border-color: var(--line-strong);
 }
@@ -6486,14 +6510,21 @@ html[data-theme="dark"] .editor-bar {
 .editor-brand-seal {
   display: grid;
   place-items: center;
-  width: 29px;
-  height: 29px;
+  width: 30px;
+  height: 30px;
   flex: none;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
+  background: transparent;
+  color: var(--accent);
   font-family: var(--font-serif);
   font-size: 14px;
+}
+
+.editor-brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .editor-brand-copy {
