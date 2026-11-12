@@ -513,6 +513,7 @@
     initFilters();
     initActions();
     initAlmanac();
+    initHeroNote();
     initWeather();
   }
 
@@ -521,6 +522,13 @@
     import('./almanac.js')
       .then((mod) => mod.hydrateAlmanac(document))
       .catch(() => { /* 加载失败时保留原来的「星期X · 宜记录」 */ });
+  }
+
+  function initHeroNote() {
+    if (!$('[data-hero-note]')) return;
+    import('./hero-note.js')
+      .then((mod) => mod.hydrateHeroNote(document))
+      .catch(() => { /* 加载失败时只保留黄历，不显示星座标签 */ });
   }
 
   function initWeather() {

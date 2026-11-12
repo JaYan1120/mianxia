@@ -1151,9 +1151,9 @@ html[data-theme="dark"] .paper-shadow {
   position: relative;
   margin-top: 18px;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 11px 14px 12px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 14px 11px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--card-soft);
@@ -1166,12 +1166,102 @@ html[data-theme="dark"] .paper-shadow {
 
 .hero-note .tiny-star {
   flex: none;
-  margin-top: 3px;
+  color: var(--accent);
+  opacity: 0.75;
+}
+
+/* 黄历 / 星座 切换 */
+
+.note-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 21px;
+}
+
+.note-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgb(var(--accent-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.note-tab {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+
+.note-tab:hover {
+  color: var(--ink);
+}
+
+.note-tab.is-active {
+  background: var(--card-strong);
+  color: var(--accent);
+  box-shadow: 0 1px 6px rgb(58 41 23 / 0.08);
+}
+
+.note-tab:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 1px;
+}
+
+.note-detail {
+  margin-left: auto;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 1px 0 1px 8px;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.18s;
+}
+
+.note-detail::after {
+  content: "›";
+  font-size: 11px;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+.note-detail:hover,
+.note-detail[aria-expanded="true"] {
+  color: var(--accent);
+}
+
+.note-detail:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.note-panels {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .almanac-lines {
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
@@ -1215,6 +1305,384 @@ html[data-theme="dark"] .paper-shadow {
   font-style: normal;
   color: var(--muted);
   opacity: 0.7;
+}
+
+/* ---- 今日星座（折叠行 + 详情浮层） ---- */
+
+.horo-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.horo-line:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.horo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgb(var(--accent-rgb) / 0.12);
+  color: var(--accent);
+  font-size: 9.5px;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.horo-chip-symbol {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.horo-summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.horo-open-hint {
+  margin-left: auto;
+  flex: none;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgb(var(--accent-rgb) / 0.1);
+  color: var(--accent);
+  font-size: 9.5px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.horo-card {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 14px 15px 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card-strong);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: var(--ink-soft);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: horoIn 0.18s var(--ease) both;
+}
+
+/* 上方空间不够时由 hero-note.js 切到下方展开 */
+.horo-card.is-below {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
+/*
+ * 浮层打开时会被移到 body 上、改成 fixed 定位（left/top/width 由 JS 量出来写内联）。
+ * 这样才能盖在首页后续内容之上，也不会受祖先 transform 动画影响。
+ */
+.horo-card.is-floating {
+  position: fixed;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  /* 盖住音乐按钮（76）和首页内容，但仍在吸顶导航（80）下面 */
+  z-index: 78;
+}
+
+@keyframes horoIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+
+.horo-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.horo-card-symbol {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb) / 0.12);
+  color: var(--accent);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.horo-card-id {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.horo-card-id b {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.horo-card-id small {
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.horo-card-date {
+  margin-left: auto;
+  font-size: 9.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.horo-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.horo-close:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.horo-close:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 1px;
+}
+
+.horo-headline {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.horo-meters {
+  display: grid;
+  gap: 5px;
+  margin-top: 11px;
+}
+
+.horo-meter {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.horo-meter-name {
+  color: var(--muted);
+}
+
+.horo-meter-track {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: rgb(var(--accent-rgb) / 0.12);
+  overflow: hidden;
+}
+
+.horo-meter-track b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgb(var(--accent-rgb) / 0.55), var(--accent));
+}
+
+.horo-meter-value {
+  text-align: right;
+  color: var(--ink);
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.horo-tip {
+  margin: 11px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgb(var(--accent-rgb) / 0.06);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.horo-tip b {
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.horo-lucky {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 10px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.horo-lucky-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.horo-lucky-item b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.horo-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
+}
+
+.horo-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.horo-switch {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 10.5px;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.horo-switch:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.horo-foot-note {
+  margin-left: auto;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.horo-picker {
+  margin-top: 10px;
+}
+
+.horo-picker-hint {
+  margin: 0 0 7px;
+  font-size: 9.5px;
+  color: var(--muted);
+}
+
+.horo-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.horo-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card-soft);
+  font: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+
+.horo-pick:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.horo-pick.is-active {
+  border-color: var(--accent);
+  background: rgb(var(--accent-rgb) / 0.1);
+  color: var(--accent);
+}
+
+.horo-pick:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 1px;
+}
+
+.horo-pick-symbol {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.horo-pick b {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.horo-pick small {
+  font-size: 8px;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .horo-picker-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* ---- 首页天气 ---- */
@@ -6527,6 +6995,61 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: 1px;
 }
 
+/* ---- 设置：自动上传 ---- */
+
+.auto-publish {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card-soft);
+  transition: opacity 0.2s ease;
+}
+
+.auto-publish.is-off {
+  opacity: 0.72;
+}
+
+.auto-publish-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auto-publish-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.auto-publish.is-off .auto-publish-dot {
+  background: var(--muted);
+}
+
+.auto-publish-line strong {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.auto-publish-line .text-button {
+  margin-left: auto;
+  font-size: 9.5px;
+}
+
+.auto-publish-hint {
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 .publish-actions {
   display: flex;
   align-items: center;
@@ -7766,6 +8289,16 @@ html[data-theme="dark"] .status-pill.is-published {
   display: grid;
   gap: 12px;
   margin-top: 14px;
+}
+
+.horoscope-settings {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.horoscope-settings.is-off {
+  opacity: 0.45;
 }
 
 .weather-summary {

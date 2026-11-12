@@ -90,7 +90,25 @@
         </a>
         <div class="paper-seal" aria-hidden="true"><span>眠</span><small>记录</small></div>
       </div>
-      <div class="hero-note" data-almanac><span class="tiny-star"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8Z"/></svg></span><span class="almanac-lines" data-almanac-lines>星期五 · 宜记录</span></div>
+      <div class="hero-note" data-almanac data-hero-note data-horoscope-enabled="1" data-author-sign="scorpio">
+        <div class="note-head">
+          <span class="tiny-star"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8Z"/></svg></span>
+          <div class="note-tabs" role="tablist" aria-label="查看黄历或星座">
+            <button type="button" class="note-tab is-active" id="note-tab-almanac" role="tab" aria-selected="true" aria-controls="note-panel-almanac" data-note-tab="almanac">黄历</button>
+            <button type="button" class="note-tab" id="note-tab-horoscope" role="tab" aria-selected="false" aria-controls="note-panel-horoscope" tabindex="-1" data-note-tab="horoscope">星座</button>
+          </div>
+          <button type="button" class="note-detail" data-note-detail aria-expanded="false" aria-controls="note-horoscope-card" hidden>详情</button>
+        </div>
+        <div class="note-panels">
+          <div class="note-panel" id="note-panel-almanac" role="tabpanel" aria-labelledby="note-tab-almanac" data-note-panel="almanac">
+            <span class="almanac-lines" data-almanac-lines>星期五 · 宜记录</span>
+          </div>
+          <div class="note-panel" id="note-panel-horoscope" role="tabpanel" aria-labelledby="note-tab-horoscope" data-note-panel="horoscope" hidden>
+            <button type="button" class="horo-line" data-horoscope-line aria-haspopup="dialog"></button>
+          </div>
+        </div>
+        <div class="horo-card" id="note-horoscope-card" data-horoscope-card role="dialog" aria-label="今日星座运势" hidden></div>
+      </div>
       <div class="hero-weather" data-weather data-city="佛山" data-province="广东" data-lat="23.03" data-lon="113.12">
         <span class="weather-icon" data-weather-icon aria-hidden="true"></span>
         <span class="weather-line"><b class="weather-city" data-weather-city>广东佛山</b><i class="weather-sep" aria-hidden="true">·</i><span class="weather-label" data-weather-label></span><b class="weather-temp" data-weather-temp>—°</b><em class="weather-feels" data-weather-feels hidden></em></span>

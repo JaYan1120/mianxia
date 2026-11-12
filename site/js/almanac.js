@@ -117,8 +117,9 @@ function apply(node, data) {
     data.ganzhi,
     data.chongsha
   ].filter(Boolean).join(' · ');
-  if (detail) node.title = detail;
-  node.setAttribute(
+  // 卡片顶部现在多了「黄历 / 星座」切换，提示只挂在宜忌文字上，避免整卡都有 tooltip
+  if (detail) lines.title = detail;
+  lines.setAttribute(
     'aria-label',
     `今日宜忌：宜 ${data.yi.join('、') || '无'}；忌 ${data.ji.join('、') || '无'}`
   );
