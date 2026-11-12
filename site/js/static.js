@@ -513,6 +513,7 @@
     initFilters();
     initActions();
     initAlmanac();
+    initWeather();
   }
 
   function initAlmanac() {
@@ -520,6 +521,13 @@
     import('./almanac.js')
       .then((mod) => mod.hydrateAlmanac(document))
       .catch(() => { /* 加载失败时保留原来的「星期X · 宜记录」 */ });
+  }
+
+  function initWeather() {
+    if (!$('[data-weather]')) return;
+    import('./weather.js')
+      .then((mod) => mod.hydrateWeather(document))
+      .catch(() => { /* 取不到天气时整块隐藏 */ });
   }
 
   function initActions() {
