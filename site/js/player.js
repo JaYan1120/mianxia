@@ -127,6 +127,8 @@
   let songs = [];
   let currentIndex = -1;
   let pendingSeek = 0;
+  // 懒加载：记录已绑定到 <audio> 的歌曲 id；页面加载时保持为空，避免自动预取音频
+  let loadedId = '';
   let lastTimeSave = 0;
   let mode = 'list';
   let playerOpen = false;
@@ -545,8 +547,16 @@
     currentIndex = normalized;
     pendingSeek = Math.max(0, Number(options.time) || 0);
     audio.loop = mode === 'one';
-    audio.src = song.url;
-    audio.load();
+    if (options.defer) {
+      // 只更新「选中哪首」的显示状态，不绑定音源：页面加载时零音频请求
+      loadedId = '';
+      audio.removeAttribute('src');
+      audio.load();
+    } else {
+      audio.src = song.url;
+      loadedId = song.id;
+      audio.load();
+    }
     renderNow();
     renderPlaylist();
     updatePlayButton();
@@ -562,6 +572,17 @@
     }
   };
 
+  // 真正要播放时才把音源绑到 <audio> 上（按需加载）
+  const bindSource = () => {
+    const song = songs[currentIndex];
+    if (!song) return false;
+    if (loadedId === song.id && audio.getAttribute('src')) return true;
+    audio.src = song.url;
+    loadedId = song.id;
+    audio.load();
+    return true;
+  };
+
   const togglePlay = () => {
     if (!songs.length) return;
     if (currentIndex < 0) {
@@ -569,6 +590,7 @@
       return;
     }
     if (audio.paused || audio.ended) {
+      if (!bindSource()) return;
       if (audio.ended) audio.currentTime = 0;
       audio.play().catch(() => {
         artistNode.textContent = '点击播放开始收听';
@@ -592,6 +614,7 @@
     if (!songs.length) {
       audio.pause();
       audio.removeAttribute('src');
+      loadedId = '';
       audio.load();
       currentIndex = -1;
       setPlayerOpen(false);
@@ -614,7 +637,8 @@
       return;
     }
     const restoreTime = foundIndex > -1 ? Number(readStorage(STORAGE.time, '0')) || 0 : 0;
-    selectTrack(foundIndex > -1 ? foundIndex : 0, { time: restoreTime, autoplay: false });
+    // 只恢复「上次听到哪首、哪个位置」的显示，不预取音频；点播放时才真正加载
+    selectTrack(foundIndex > -1 ? foundIndex : 0, { time: restoreTime, autoplay: false, defer: true });
     schedulePeek(1800);
   };
 
@@ -977,8 +1001,11 @@
     };
     setHandler('play', () => {
       if (!songs.length) return;
-      if (currentIndex < 0) selectTrack(0, { autoplay: true });
-      else audio.play().catch(() => updatePlayButton());
+      if (currentIndex < 0) {
+        selectTrack(0, { autoplay: true });
+        return;
+      }
+      if (bindSource()) audio.play().catch(() => updatePlayButton());
     });
     setHandler('pause', () => audio.pause());
     setHandler('previoustrack', () => {
