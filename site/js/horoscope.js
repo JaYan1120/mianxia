@@ -152,6 +152,27 @@ const LUCKY_COLORS = [
 
 const DIRECTIONS = ['东', '南', '西', '北', '东南', '西南', '东北', '西北'];
 
+/** 星座版「宜」：都是能当天做完的小事，不写空话。 */
+const YI_LIST = [
+  '独处', '散步', '早睡', '整理', '读书', '写日记', '复盘', '断舍离', '下厨', '发呆',
+  '晒太阳', '换个座位', '主动开口', '把话说清', '留白', '慢一点', '运动', '泡茶', '听歌', '收尾',
+  '拒绝', '示弱', '尝新', '把话说软', '记账', '清洗', '远眺', '拥抱', '请教', '定计划'
+];
+
+/** 星座版「忌」：具体到行为，避免「忌冲动」这种正确但没用的提醒。 */
+const JI_LIST = [
+  '熬夜', '逞强', '内耗', '翻旧账', '硬撑', '过度解释', '讨好', '比价', '冲动下单', '深夜emo',
+  '反复确认', '赌气', '自我否定', '久坐', '刷手机', '熬夜刷剧', '抢话', '较真', '过度计划', '猜忌',
+  '空腹喝咖啡', '替人决定', '把话说满', '回头找人', '硬碰硬', '翻旧聊天', '钻牛角尖', '一口气做完', '逞口舌', '忽略身体'
+];
+
+/** 今日关键词：两个字的调性词，配合一句话运势一起看。 */
+const KEYWORD_LIST = [
+  '收敛', '专注', '舒展', '留白', '沉淀', '轻装', '笃定', '松弛', '清醒', '温柔',
+  '克制', '热烈', '安静', '笃行', '慢热', '通透', '自洽', '轻盈', '扎根', '向上',
+  '回望', '出发', '落地', '呼吸'
+];
+
 const SCORE_LABELS = [
   { key: 'overall', name: '综合' },
   { key: 'love', name: '爱情' },
@@ -212,33 +233,73 @@ function score(random) {
   return 56 + Math.floor(random() * 44);
 }
 
-export function dailyHoroscope(signKey, date = new Date()) {
-  const sign = signByKey(signKey) || signByKey(DEFAULT_SIGN);
+/** 从列表里不重复地抽 count 个。 */
+function drawDistinct(random, list, count) {
+  const pool = list.slice();
+  const picked = [];
+  while (picked.length < count && pool.length) {
+    picked.push(pool.splice(Math.floor(random() * pool.length), 1)[0]);
+  }
+  return picked;
+}
+
+/**
+ * 抽某一天的全部数据。
+ * 抽取顺序不要随便动：先一句话/提醒/五项指数/幸运三项，再抽后加的宜忌和关键词，
+ * 这样以后加内容不会把已有的运势、指数、幸运色全打乱。
+ */
+function drawFortune(signKey, date) {
   const day = localDateKey(date);
-  const random = createRandom(hashString(`${sign.key}|${day}|mianxia`));
+  const random = createRandom(hashString(`${signKey}|${day}|mianxia`));
   const headline = pick(random, DAILY_LINES);
-  const note = pick(random, SIGN_NOTES[sign.key]);
+  const note = pick(random, SIGN_NOTES[signKey]);
   const love = score(random);
   const career = score(random);
   const money = score(random);
   const health = score(random);
   const average = Math.round((love + career + money + health) / 4);
   const overall = Math.max(50, Math.min(99, average + Math.round((random() - 0.4) * 10)));
+  const lucky = {
+    color: pick(random, LUCKY_COLORS),
+    number: 1 + Math.floor(random() * 9),
+    direction: pick(random, DIRECTIONS)
+  };
+  const yi = drawDistinct(random, YI_LIST, 2);
+  const ji = drawDistinct(random, JI_LIST, 2);
+  const keywords = drawDistinct(random, KEYWORD_LIST, random() < 0.4 ? 3 : 2);
+  return {
+    day,
+    headline,
+    note,
+    scores: { overall, love, career, money, health },
+    lucky,
+    yi,
+    ji,
+    keywords
+  };
+}
+
+export function dailyHoroscope(signKey, date = new Date()) {
+  const sign = signByKey(signKey) || signByKey(DEFAULT_SIGN);
+  const today = drawFortune(sign.key, date);
+  // 顺便算昨天的综合指数，用来显示「较昨日 ↑↓」
+  const yesterdayDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+  const yesterday = drawFortune(sign.key, yesterdayDate);
   return {
     sign: sign.key,
     name: sign.name,
     symbol: sign.symbol,
     range: sign.range,
     element: sign.element,
-    date: day,
-    headline,
-    note,
-    scores: { overall, love, career, money, health },
-    lucky: {
-      color: pick(random, LUCKY_COLORS),
-      number: 1 + Math.floor(random() * 9),
-      direction: pick(random, DIRECTIONS)
-    }
+    date: today.day,
+    headline: today.headline,
+    note: today.note,
+    scores: today.scores,
+    trend: { delta: today.scores.overall - yesterday.scores.overall },
+    lucky: today.lucky,
+    yi: today.yi,
+    ji: today.ji,
+    keywords: today.keywords
   };
 }
 
@@ -250,12 +311,19 @@ function escapeText(value) {
     .replace(/"/g, '&quot;');
 }
 
+function trendMarkup(delta) {
+  if (typeof delta !== 'number') return '';
+  if (delta > 0) return `<i class="horo-trend is-up" title="综合指数较昨日">↑${delta}</i>`;
+  if (delta < 0) return `<i class="horo-trend is-down" title="综合指数较昨日">↓${Math.abs(delta)}</i>`;
+  return '<i class="horo-trend is-flat" title="综合指数较昨日">持平</i>';
+}
+
 function meterMarkup(data) {
   return SCORE_LABELS.map(({ key, name }) => `
     <span class="horo-meter">
       <span class="horo-meter-name">${name}</span>
       <i class="horo-meter-track"><b style="width:${data.scores[key]}%"></b></i>
-      <em class="horo-meter-value">${data.scores[key]}</em>
+      <em class="horo-meter-value">${data.scores[key]}${key === 'overall' ? trendMarkup(data.trend && data.trend.delta) : ''}</em>
     </span>`).join('');
 }
 
@@ -295,8 +363,13 @@ function cardMarkup(data, { authorSign, pickerOpen }) {
       <button type="button" class="horo-close" data-horo-close aria-label="关闭运势卡">✕</button>
     </div>
     <p class="horo-headline">${escapeText(data.headline)}</p>
+    <div class="horo-tags">${(data.keywords || []).map((word) => `<span class="horo-tag">${escapeText(word)}</span>`).join('')}</div>
     <div class="horo-meters">${meterMarkup(data)}</div>
     <p class="horo-tip"><b>今日提醒</b>${escapeText(data.note)}</p>
+    <div class="horo-yiji">
+      <span class="horo-yiji-line"><b class="horo-yiji-tag">宜</b><span class="horo-yiji-text">${(data.yi || []).map(escapeText).join(' · ')}</span></span>
+      <span class="horo-yiji-line is-ji"><b class="horo-yiji-tag">忌</b><span class="horo-yiji-text">${(data.ji || []).map(escapeText).join(' · ')}</span></span>
+    </div>
     <div class="horo-lucky">
       <span class="horo-lucky-item">幸运色<em class="horo-swatch" style="background:${data.lucky.color.hex}"></em>${escapeText(data.lucky.color.name)}</span>
       <span class="horo-lucky-item">幸运数字<b>${data.lucky.number}</b></span>

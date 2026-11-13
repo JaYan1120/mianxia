@@ -92,11 +92,12 @@ export function hydrateHeroNote(root = document) {
     };
   }
 
-  // 默认朝上；只有上方实在放不下（离顶部很近）才翻到下面
+  // 打开时选一个放得下的方向：优先上方，上方放不下再考虑下方，都放不下就选空间大的
   function chooseSide(height) {
     const { above, below } = noteMetrics();
-    if (above >= Math.min(height, 220)) return 'above';
-    return below > above && below >= 200 ? 'below' : 'above';
+    if (above >= height) return 'above';
+    if (below >= height) return 'below';
+    return below > above ? 'below' : 'above';
   }
 
   /**
