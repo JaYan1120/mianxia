@@ -4933,6 +4933,63 @@ html[data-theme="dark"] .contact-status[data-state="error"] {
   margin-top: 9px;
 }
 
+/* B 站内嵌播放器：16:9 卡片；编辑器里盖一层蒙层，避免点击被 iframe 吃掉 */
+.article-body .media-embed .embed-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: #0c0b0a;
+  box-shadow: var(--shadow-sm);
+}
+
+.article-body .media-embed .embed-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.embed-frame-veil {
+  display: none;
+}
+
+.editor-content .embed-frame-veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.editor-content .embed-frame:hover .embed-frame-veil {
+  background: rgb(12 11 10 / 0.12);
+}
+
+.embed-frame-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.editor-content .embed-frame:hover .embed-frame-badge {
+  opacity: 1;
+  transform: none;
+}
+
 .media-dialog {
   display: grid;
   gap: 14px;
