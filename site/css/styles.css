@@ -7127,6 +7127,51 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 9.5px;
 }
 
+.auto-publish-rhythm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.auto-publish-rhythm-label {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.auto-publish-mode {
+  width: auto;
+  min-width: 118px;
+  height: 30px;
+  padding: 0 26px 0 10px;
+  font-size: 9.5px;
+}
+
+.auto-publish-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.auto-publish-number {
+  width: 58px;
+  height: 30px;
+  padding: 0 8px;
+  font-size: 9.5px;
+  text-align: center;
+}
+
+.auto-publish-time {
+  height: 30px;
+  padding: 0 8px;
+  font-size: 9.5px;
+}
+
 .auto-publish-hint {
   font-size: 9.5px;
   line-height: 1.6;
