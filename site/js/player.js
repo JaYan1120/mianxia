@@ -655,7 +655,9 @@
   };
   const syncVolume = () => {
     applyAudioVolume();
-    volumeInput.value = String(currentVolume);
+    // 静音时滑块归零，但 currentVolume 保留原值，解除静音时原样恢复
+    volumeInput.value = String(muted ? 0 : currentVolume);
+    volumeInput.setAttribute('aria-valuetext', muted ? '已静音' : Math.round(currentVolume * 100) + '%');
     renderMute();
   };
   const setVolume = (value) => {
@@ -669,7 +671,10 @@
   };
   const toggleMute = () => {
     muted = !muted;
-    if (!muted && currentVolume === 0) currentVolume = DEFAULT_VOLUME;
+    if (!muted && currentVolume === 0) {
+      currentVolume = DEFAULT_VOLUME;
+      try { localStorage.setItem(STORAGE.volume, String(currentVolume)); } catch { /* ignore */ }
+    }
     try { localStorage.setItem(STORAGE.muted, muted ? '1' : '0'); } catch { /* ignore */ }
     syncVolume();
   };

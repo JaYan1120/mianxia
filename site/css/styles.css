@@ -3,6 +3,8 @@
    ========================================================================== */
 
 :root {
+  /* 让 light-dark() 和原生控件在浅色主题下明确按 light 解析 */
+  color-scheme: light;
   --font-serif: "Songti SC", "STSong", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
   --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
   --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Songti SC", serif;
@@ -20,6 +22,15 @@
   --on-accent: #fff8ee;
   --accent-link: var(--accent);
   --accent-link: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  /* 正文调色板：浅色/深色各一套。编辑器写入 var(--txt-*)，不再写死十六进制 */
+  --txt-ink: #29241d;
+  --txt-accent: #b45138;
+  --txt-moss: #6f7b5e;
+  --txt-blue: #5f7381;
+  --txt-rose: #9b5d55;
+  --txt-ochre: #8a6a45;
+  --txt-gold: #826834;
+  --txt-gray: #6d6b69;
   --card: rgb(255 252 246 / 0.66);
   --card-strong: rgb(255 252 246 / 0.9);
   --card-soft: rgb(255 252 246 / 0.46);
@@ -47,6 +58,14 @@ html[data-theme="dark"] {
   --muted: #958979;
   --accent-link: var(--accent);
   --accent-link: color-mix(in srgb, var(--accent) 55%, #fff 45%);
+  --txt-ink: #f1e9dc;
+  --txt-accent: #c1715a;
+  --txt-moss: #80896e;
+  --txt-blue: #798891;
+  --txt-rose: #ac7970;
+  --txt-ochre: #9d8160;
+  --txt-gold: #d4a64a;
+  --txt-gray: #8a8a8a;
   --card: rgb(31 29 26 / 0.7);
   --card-strong: rgb(33 30 27 / 0.92);
   --card-soft: rgb(31 29 26 / 0.5);
@@ -825,6 +844,22 @@ html[data-theme="dark"] .theme-icon-sun {
   height: 1px;
   background: var(--line);
   margin: 6px 4px;
+}
+
+.account-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: auto;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: rgb(var(--accent-rgb) / 0.12);
+  color: var(--accent-link);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .mobile-menu-trigger {
@@ -5141,6 +5176,77 @@ html[data-theme="dark"] .article-body pre {
   background: rgb(222 215 202 / 0.68);
 }
 
+/* 深色主题下高亮只留淡淡一层色，否则浅色文字压在浅色底上会糊 */
+html[data-theme="dark"] .article-body mark {
+  background: rgb(242 214 147 / 0.22);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="pink"] {
+  background: rgb(240 196 200 / 0.22);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="green"] {
+  background: rgb(201 221 182 / 0.24);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="blue"] {
+  background: rgb(194 217 232 / 0.24);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="purple"] {
+  background: rgb(217 200 232 / 0.22);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="orange"] {
+  background: rgb(242 201 164 / 0.24);
+}
+
+html[data-theme="dark"] .article-body mark[data-highlight="gray"] {
+  background: rgb(222 215 202 / 0.22);
+}
+
+/* 历史内容里的内联文字颜色：旧版本把调色板写成了固定值。
+   这里统一映射到会跟随主题的语义色，所以不用改写 posts.json。 */
+.article-body [style*="color: rgb(41, 36, 29)"],
+.article-body [style*="color: #29241d"] {
+  color: var(--txt-ink) !important;
+}
+
+.article-body [style*="color: rgb(180, 81, 56)"],
+.article-body [style*="color: #b45138"] {
+  color: var(--txt-accent) !important;
+}
+
+.article-body [style*="color: rgb(111, 123, 94)"],
+.article-body [style*="color: #6f7b5e"] {
+  color: var(--txt-moss) !important;
+}
+
+.article-body [style*="color: rgb(95, 115, 129)"],
+.article-body [style*="color: #5f7381"] {
+  color: var(--txt-blue) !important;
+}
+
+.article-body [style*="color: rgb(155, 93, 85)"],
+.article-body [style*="color: #9b5d55"] {
+  color: var(--txt-rose) !important;
+}
+
+.article-body [style*="color: rgb(138, 106, 69)"],
+.article-body [style*="color: #8a6a45"] {
+  color: var(--txt-ochre) !important;
+}
+
+.article-body [style*="color: rgb(212, 166, 74)"],
+.article-body [style*="color: #d4a64a"] {
+  color: var(--txt-gold) !important;
+}
+
+.article-body [style*="color: rgb(138, 138, 138)"],
+.article-body [style*="color: #8a8a8a"] {
+  color: var(--txt-gray) !important;
+}
+
 .article-end {
   margin-top: 52px;
   padding-top: 27px;
@@ -5844,6 +5950,214 @@ html[data-theme="dark"] .modal {
   flex: none;
   padding: 16px 30px 20px;
   border-top: 1px solid var(--line);
+}
+
+/* Draft box */
+.draft-box-modal .modal-body {
+  padding-top: 16px;
+}
+
+.draft-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.draft-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(var(--accent-rgb) / 0.035);
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+
+.draft-row:hover {
+  border-color: var(--line-strong);
+  background: rgb(var(--accent-rgb) / 0.075);
+  transform: translateY(-1px);
+}
+
+.draft-row-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.draft-row-main:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.draft-row-title {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.draft-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.draft-row-meta i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.draft-row-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  font-size: 10.5px;
+  color: var(--accent-link);
+  opacity: 0.75;
+}
+
+.draft-row:hover .draft-row-go {
+  opacity: 1;
+}
+
+.draft-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+
+.draft-delete {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--muted);
+  opacity: 0.7;
+  transition: opacity 0.18s, color 0.18s, background 0.18s, border-color 0.18s;
+}
+
+.draft-row:hover .draft-delete {
+  opacity: 0.9;
+}
+
+.draft-delete:hover {
+  border-color: rgb(var(--accent-rgb) / 0.18);
+  background: rgb(var(--accent-rgb) / 0.09);
+  color: var(--accent-link);
+  opacity: 1;
+}
+
+.draft-delete:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.draft-delete:disabled {
+  opacity: 0.26;
+  cursor: not-allowed;
+}
+
+.draft-row.is-deleting {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.draft-empty {
+  padding: 26px 18px 20px;
+  text-align: center;
+}
+
+.draft-empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb) / 0.08);
+  color: var(--accent-link);
+}
+
+.draft-empty strong {
+  display: block;
+  margin: 12px 0 5px;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.draft-empty p {
+  max-width: 280px;
+  margin: 0 auto;
+  font-size: 11.5px;
+  line-height: 1.85;
+  color: var(--muted);
+}
+
+.draft-box-foot {
+  margin-right: auto;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.draft-box-foot b {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .editor-drafts span {
+    max-width: 82px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 640px) {
+  .editor-drafts {
+    height: 33px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+
+  .editor-drafts span {
+    max-width: none;
+  }
+
+  .draft-row {
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  .draft-row-go {
+    display: none;
+  }
+
+  .draft-delete {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .confirm-detail {
@@ -6993,6 +7307,36 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--muted);
 }
 
+.music-admin-list-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.music-admin-sort {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.music-admin-sort:hover:not(:disabled) {
+  background: rgb(var(--accent-rgb) / 0.08);
+  color: var(--accent-link);
+}
+
+.music-admin-sort.is-active {
+  background: rgb(var(--accent-rgb) / 0.14);
+  color: var(--accent);
+}
+
+.music-admin-sort:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .music-admin-list {
   border: 1px solid var(--line);
   border-radius: 11px;
@@ -7565,6 +7909,61 @@ html[data-theme="dark"] .save-state-saved {
   animation: spin 1s linear infinite;
 }
 
+.editor-drafts {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+}
+
+.editor-drafts b {
+  font-weight: 600;
+  color: var(--accent-link);
+}
+
+.editor-drafts:hover {
+  border-color: var(--line-strong);
+  background: rgb(var(--accent-rgb) / 0.05);
+  color: var(--ink);
+}
+
+.editor-delete-draft {
+  color: var(--accent-link);
+}
+
+.editor-delete-draft:hover {
+  color: var(--ink);
+  background: rgb(var(--accent-rgb) / 0.08);
+}
+
+.editor-delete-draft:disabled {
+  opacity: 0.45;
+}
+
+@media (max-width: 900px) {
+  .editor-bar-actions [data-editor-delete] {
+    width: 35px;
+    padding: 0;
+  }
+
+  .editor-bar-actions [data-editor-delete] span {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .editor-bar-actions [data-editor-delete] {
+    width: 33px;
+  }
+}
+
 .editor-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 328px;
@@ -7947,8 +8346,10 @@ html[data-theme="dark"] .editor-color-panel {
   box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.13);
 }
 
+/* 深色面板上深色色块（墨色）几乎看不出边界，给两种色块统一加描边 */
+html[data-theme="dark"] .color-swatch,
 html[data-theme="dark"] .highlight-swatch {
-  border-color: rgb(255 245 232 / 0.16);
+  border-color: rgb(255 245 232 / 0.22);
 }
 
 .highlight-clear {
@@ -10707,12 +11108,12 @@ html[data-theme="dark"] .recovery-delete {
   padding: 4px 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: var(--card-soft);
-  color: var(--muted);
+  background: var(--card-strong);
+  color: var(--ink-soft);
   font-family: var(--font-sans);
   font-size: 9px;
   cursor: pointer;
-  opacity: 0.72;
+  opacity: 0.86;
   transition: opacity 0.2s, color 0.2s, border-color 0.2s;
 }
 
