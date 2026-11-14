@@ -5577,6 +5577,29 @@ html[data-theme="dark"] .message-action.is-danger {
   background: var(--line-strong);
 }
 
+.article-body hr[data-divider="full"] {
+  width: 100%;
+}
+
+.article-body hr[data-divider="thick"] {
+  height: 3px;
+}
+
+.article-body hr[data-divider="dashed"] {
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 8px, transparent 8px 14px);
+}
+
+.article-body hr[data-divider="dotted"] {
+  background: repeating-linear-gradient(90deg, var(--line-strong) 0 2px, transparent 2px 6px);
+}
+
+.article-body hr[data-divider="double"] {
+  height: 3px;
+  background:
+    linear-gradient(var(--line-strong), var(--line-strong)) 0 0 / 100% 1px no-repeat,
+    linear-gradient(var(--line-strong), var(--line-strong)) 0 100% / 100% 1px no-repeat;
+}
+
 .article-body figure {
   margin: 2em 0;
   text-align: center;
@@ -7321,9 +7344,9 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 0;
+  padding: 12px 0;
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: 20px;
   color: var(--ink);
   border-bottom: 1px solid transparent;
   transition: color 0.2s;
@@ -7335,6 +7358,54 @@ kbd {
 
 .sheet-nav a .icon {
   color: var(--muted);
+}
+
+.sheet-label {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 16px 0 4px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.sheet-label span {
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  opacity: 0.55;
+}
+
+.sheet-admin-label {
+  margin: 2px 0 10px;
+}
+
+/* 只有出现分组标签时才收紧间距并改成两列，访客态与静态站保持原样 */
+.mobile-sheet:has(.sheet-label) .sheet-nav {
+  padding: 0 0 6px;
+}
+
+.mobile-sheet:has(.sheet-label) .sheet-admin {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.mobile-sheet:has(.sheet-label) .sheet-admin .btn {
+  height: 44px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.mobile-sheet:has(.sheet-label) .sheet-logout {
+  grid-column: 1 / -1;
+}
+
+.mobile-sheet:has(.sheet-label) .sheet-divider {
+  margin: 6px 0 12px;
 }
 
 .sheet-divider {
@@ -8924,11 +8995,41 @@ html[data-theme="dark"] .editor-toolbar-wrap {
 }
 
 .tool-caret-button {
-  width: 22px;
+  width: 24px;
   margin-left: 0;
   border-left: 1px solid var(--line);
   border-radius: 0 8px 8px 0;
   color: var(--muted);
+}
+
+.tool-font-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.tool-font-current {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.tool-font-unit {
+  font-size: 8.5px;
+  color: var(--muted);
+}
+
+.tool-font-trigger .icon {
+  color: var(--muted);
+}
+
+.tool-font-trigger.is-active {
+  background: rgb(var(--accent-rgb) / 0.11);
+  color: var(--accent-link);
 }
 
 .tool-letter {
@@ -8996,6 +9097,107 @@ html[data-theme="dark"] .editor-toolbar-wrap {
 
 html[data-theme="dark"] .editor-color-panel {
   background: rgb(29 27 24 / 0.98);
+}
+
+.font-size-panel {
+  width: 238px;
+  padding: 10px;
+}
+
+.font-size-head {
+  padding-bottom: 7px;
+}
+
+.font-size-head em {
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.font-size-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 40px;
+  padding: 0 7px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.font-size-row[hidden] {
+  display: none;
+}
+
+.font-size-row:hover {
+  background: rgb(var(--accent-rgb) / 0.07);
+}
+
+.font-size-row.is-active {
+  background: rgb(var(--accent-rgb) / 0.11);
+}
+
+.font-size-sample {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  font-family: var(--font-reading);
+  color: var(--ink);
+}
+
+.font-size-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.font-size-name {
+  font-size: 11px;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.font-size-desc {
+  font-size: 8px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.font-size-value {
+  font-size: 9px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.font-size-check {
+  width: 15px;
+  flex: none;
+  color: var(--accent-link);
+  text-align: center;
+}
+
+.font-size-divider {
+  height: 1px;
+  margin: 6px 7px;
+  background: var(--line);
+}
+
+.font-size-foot {
+  display: flex;
+  gap: 5px;
+  margin: 3px 7px 1px;
+  font-size: 8px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.font-size-foot b {
+  color: var(--ink-soft);
+  font-weight: 600;
 }
 
 .color-panel-head {
@@ -9272,6 +9474,72 @@ html[data-theme="dark"] .category-delete:hover {
   pointer-events: none;
   font-family: var(--font-reading);
   font-size: 15px;
+}
+
+/* 编辑器里的分割线：线本身只有 64×1px，命中区要占满整行，
+   否则 1px 的线几乎点不中。点击只选中，不建段落；样式用 data-divider 保存，
+   阅读页仍用 .article-body hr 的短横线。 */
+.editor-content hr {
+  width: auto;
+  height: 34px;
+  margin: 1.6em 0;
+  border: 0;
+  border-radius: 4px;
+  background-color: transparent;
+  background-image: linear-gradient(var(--line-strong), var(--line-strong));
+  background-position: center;
+  background-size: 64px 1px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.editor-content hr:hover {
+  background-color: rgb(var(--accent-rgb) / 0.06);
+}
+
+.editor-content hr.is-selected {
+  background-color: transparent;
+  outline: 1px dashed rgb(var(--accent-rgb) / 0.42);
+  outline-offset: -1px;
+}
+
+.editor-content hr[data-divider="full"] {
+  background-size: 100% 1px;
+}
+
+.editor-content hr[data-divider="thick"] {
+  background-size: 64px 3px;
+}
+
+.editor-content hr[data-divider="dashed"] {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(90deg, var(--line-strong) 0 8px, transparent 8px 14px);
+  background-position: center;
+  background-size: 64px 1px;
+  background-repeat: no-repeat;
+}
+
+.editor-content hr[data-divider="dotted"] {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(90deg, var(--line-strong) 0 2px, transparent 2px 6px);
+  background-position: center;
+  background-size: 64px 1px;
+  background-repeat: no-repeat;
+}
+
+.editor-content hr[data-divider="double"] {
+  background-image:
+    linear-gradient(var(--line-strong), var(--line-strong)),
+    linear-gradient(var(--line-strong), var(--line-strong));
+  background-position: center calc(50% - 2px), center calc(50% + 2px);
+  background-size: 64px 1px, 64px 1px;
+  background-repeat: no-repeat, no-repeat;
+}
+
+/* 阅读页的 double/thick 会把高度改成 3px，编辑区命中区必须仍是 34px */
+.editor-content hr[data-divider] {
+  height: 34px;
 }
 
 .editor-content.is-dragover {
@@ -11579,6 +11847,7 @@ html[data-theme="dark"] .recovery-delete {
     padding: 0 22px calc(18px + env(safe-area-inset-bottom));
   }
 
+
   .modal.settings-modal {
     height: 100vh;
     height: 100dvh;
@@ -11831,6 +12100,9 @@ html[data-theme="dark"] .recovery-delete {
 
   .editor-context-bar {
     max-width: calc(100vw - 10px);
+    flex-wrap: wrap;
+    overflow-x: visible;
+    row-gap: 2px;
   }
 
   .context-href {
@@ -12272,6 +12544,7 @@ html[data-theme="dark"] .recovery-delete {
   outline-offset: 3px;
 }
 
+html.reader-lightbox-open,
 body.reader-lightbox-open {
   overflow: hidden;
 }
@@ -12280,46 +12553,119 @@ body.reader-lightbox-open {
   position: fixed;
   inset: 0;
   z-index: 1200;
-  display: grid;
-  place-items: center;
-  padding: 32px;
   background: rgb(20 17 13 / 0.82);
   opacity: 0;
   transition: opacity 0.2s var(--ease);
+  touch-action: none;
+  overscroll-behavior: contain;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .reading-lightbox.is-open {
   opacity: 1;
 }
 
+.reading-lightbox-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
 .reading-lightbox-figure {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
   max-width: min(1100px, 92vw);
-  max-height: 88vh;
   margin: 0;
   text-align: center;
 }
 
-.reading-lightbox-figure img {
+.reading-lightbox-img {
   display: block;
-  max-width: 100%;
-  max-height: 80vh;
+  max-width: min(1100px, 92vw);
+  max-height: calc(100vh - 210px);
   margin: 0 auto;
   border-radius: 10px;
   box-shadow: 0 24px 70px rgb(0 0 0 / 0.4);
   object-fit: contain;
+  transform-origin: center center;
+  will-change: transform;
+  cursor: zoom-in;
+  -webkit-user-drag: none;
 }
 
-.reading-lightbox-figure figcaption {
-  margin-top: 12px;
+.reading-lightbox.is-zoomed .reading-lightbox-img {
+  cursor: grab;
+}
+
+.reading-lightbox-caption {
+  margin: 0;
   font-family: var(--font-reading);
   font-size: 12px;
   color: rgb(255 248 238 / 0.75);
+  transition: opacity 0.2s var(--ease);
+  pointer-events: none;
+}
+
+.reading-lightbox.is-zoomed .reading-lightbox-caption {
+  opacity: 0;
+}
+
+.reading-lightbox-toolbar {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 999px;
+  background: rgb(20 17 13 / 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.reading-lightbox-toolbar button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff8ee;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.18s, color 0.18s;
+}
+
+.reading-lightbox-toolbar button:hover,
+.reading-lightbox-toolbar button:focus-visible {
+  background: rgb(255 255 255 / 0.14);
+  outline: none;
+}
+
+.reading-lightbox-zoom {
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgb(255 248 238 / 0.8);
+  font-variant-numeric: tabular-nums;
 }
 
 .reading-lightbox-close {
   position: fixed;
   top: 18px;
   right: 20px;
+  z-index: 3;
   width: 40px;
   height: 40px;
   border: 1px solid rgb(255 255 255 / 0.2);
@@ -12332,8 +12678,17 @@ body.reader-lightbox-open {
 }
 
 @media (max-width: 640px) {
-  .reading-lightbox {
-    padding: 18px;
+  .reading-lightbox-img {
+    max-height: calc(100dvh - 170px);
+  }
+
+  .reading-lightbox-toolbar {
+    bottom: 12px;
+  }
+
+  .reading-lightbox-toolbar button {
+    min-width: 44px;
+    height: 44px;
   }
 
   .reading-lightbox-close {
