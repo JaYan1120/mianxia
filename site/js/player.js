@@ -140,6 +140,11 @@
   // 懒加载：记录已绑定到 <audio> 的歌曲 id；页面加载时保持为空，避免自动预取音频
   let loadedId = '';
   let lastTimeSave = 0;
+  // 出错自愈：wantPlay 表示“现在应该是在播的”，errorRetries 防止无限自动重试
+  let wantPlay = false;
+  let errorRetries = 0;
+  let retryTimer = 0;
+  let errorShown = false;
   let mode = 'list';
   let playerOpen = false;
   let side = 'right';
@@ -553,6 +558,9 @@
       randomHistory.push(previousIndex);
       if (randomHistory.length > 30) randomHistory.shift();
     }
+    wantPlay = false;
+    clearRetryTimer();
+    errorRetries = 0;
     audio.pause();
     currentIndex = normalized;
     pendingSeek = Math.max(0, Number(options.time) || 0);
@@ -575,18 +583,79 @@
       localStorage.setItem(STORAGE.time, String(pendingSeek));
     } catch { /* ignore */ }
     if (options.autoplay || (options.keepPlaying && wasPlaying)) {
-      audio.play().catch(() => {
-        artistNode.textContent = '点击播放开始收听';
-        updatePlayButton();
-      });
+      startPlayback();
     }
   };
 
   // 真正要播放时才把音源绑到 <audio> 上（按需加载）
+  const errorHint = (code) => {
+    if (code === 3) return '音频解码失败，换一首试试';
+    if (code === 2) return '网络中断，点击重试';
+    if (code === 1) return '加载被中断，点击重试';
+    return '音频加载失败，点击重试';
+  };
+
+  const clearRetryTimer = () => {
+    if (retryTimer) {
+      clearTimeout(retryTimer);
+      retryTimer = 0;
+    }
+  };
+
+  // 出错后重新绑定：同一个 src 不会再触发加载，必须先摘掉旧音源
+  const rebindAudio = () => {
+    const song = songs[currentIndex];
+    if (!song) return false;
+    clearRetryTimer();
+    audio.removeAttribute('src');
+    audio.load();
+    audio.src = song.url;
+    loadedId = song.id;
+    audio.load();
+    return true;
+  };
+
+  const showPlayError = (code) => {
+    clearRetryTimer();
+    wantPlay = false;
+    errorRetries = 0;
+    // 清掉 loadedId：下次点播放必须重新绑定，不能停在 error 状态
+    loadedId = '';
+    errorShown = true;
+    artistNode.textContent = errorHint(code);
+    updatePlayButton();
+    if (typeof console !== 'undefined' && console.warn) {
+      const song = songs[currentIndex];
+      console.warn('[player] 音频加载失败', code, song ? song.url : '');
+    }
+  };
+
+  const startPlayback = () => {
+    const song = songs[currentIndex];
+    if (!song) return;
+    if (!bindSource()) return;
+    if (audio.ended) audio.currentTime = 0;
+    wantPlay = true;
+    updatePlayButton();
+    const promise = audio.play();
+    if (!promise || typeof promise.catch !== 'function') return;
+    promise.catch(() => {
+      // 已经出错时保留具体原因，不要覆盖成「点击播放开始收听」
+      if (audio.error) {
+        updatePlayButton();
+        return;
+      }
+      wantPlay = false;
+      artistNode.textContent = '点击播放开始收听';
+      updatePlayButton();
+    });
+  };
+
   const bindSource = () => {
     const song = songs[currentIndex];
     if (!song) return false;
-    if (loadedId === song.id && audio.getAttribute('src')) return true;
+    if (loadedId === song.id && audio.getAttribute('src') && !audio.error) return true;
+    if (audio.error) return rebindAudio();
     audio.src = song.url;
     loadedId = song.id;
     audio.load();
@@ -600,13 +669,11 @@
       return;
     }
     if (audio.paused || audio.ended) {
-      if (!bindSource()) return;
-      if (audio.ended) audio.currentTime = 0;
-      audio.play().catch(() => {
-        artistNode.textContent = '点击播放开始收听';
-        updatePlayButton();
-      });
+      errorRetries = 0;
+      startPlayback();
     } else {
+      wantPlay = false;
+      clearRetryTimer();
       audio.pause();
     }
   };
@@ -642,7 +709,7 @@
       currentIndex = songs.findIndex((song) => song.id === previousId);
       renderNow();
       renderPlaylist();
-      if (wasPlaying && audio.paused) audio.play().catch(() => {});
+      if (wasPlaying && audio.paused) startPlayback();
       schedulePeek(1800);
       return;
     }
@@ -761,6 +828,12 @@
   audio.addEventListener('seeked', () => updateMediaPosition(true));
   audio.addEventListener('ratechange', () => updateMediaPosition(true));
   audio.addEventListener('play', () => {
+    wantPlay = true;
+    errorRetries = 0;
+    if (errorShown) {
+      errorShown = false;
+      renderNow();
+    }
     updatePlayButton();
     saveTrack();
   });
@@ -772,7 +845,7 @@
     if (!songs.length) return;
     if (mode === 'one') {
       audio.currentTime = 0;
-      audio.play().catch(() => updatePlayButton());
+      startPlayback();
       return;
     }
     if (mode === 'off') {
@@ -788,8 +861,42 @@
   });
   audio.addEventListener('error', () => {
     if (!songs.length) return;
-    artistNode.textContent = '音频加载失败';
-    updatePlayButton();
+    const code = audio.error ? audio.error.code : 0;
+    // 切歌/暂停造成的中断不算失败，也不该覆盖文案
+    if (code === 1) {
+      updatePlayButton();
+      return;
+    }
+    // 正在播的时候掉线：直接提示并等用户点重试
+    if (!wantPlay) {
+      showPlayError(code);
+      return;
+    }
+    if (errorRetries < 1) {
+      errorRetries += 1;
+      clearRetryTimer();
+      // 文案先给可操作的结果，自动重试在后台进行；成功播放时再恢复歌名
+      errorShown = true;
+      artistNode.textContent = errorHint(code);
+      updatePlayButton();
+      retryTimer = setTimeout(() => {
+        retryTimer = 0;
+        if (!wantPlay) return;
+        if (!rebindAudio()) return;
+        const promise = audio.play();
+        if (promise && typeof promise.catch === 'function') {
+          promise.catch(() => {
+            if (!audio.error) {
+              wantPlay = false;
+              artistNode.textContent = '点击播放开始收听';
+            }
+            updatePlayButton();
+          });
+        }
+      }, 700);
+      return;
+    }
+    showPlayError(code);
   });
 
   seek.addEventListener('input', () => {
@@ -1016,7 +1123,7 @@
         selectTrack(0, { autoplay: true });
         return;
       }
-      if (bindSource()) audio.play().catch(() => updatePlayButton());
+      startPlayback();
     });
     setHandler('pause', () => audio.pause());
     setHandler('previoustrack', () => {

@@ -4370,10 +4370,6 @@ html[data-theme="dark"] .about-music-points > div {
   color: var(--muted) !important;
 }
 
-.about-contact-link {
-  border-style: dashed !important;
-}
-
 .about-contact {
   margin-top: 30px;
   padding: 20px;
