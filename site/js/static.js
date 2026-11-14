@@ -207,6 +207,7 @@
     if (!overlay) return;
     closeOverlays(overlay);
     overlay._returnFocus = document.activeElement;
+    overlay.classList.remove('is-closing');
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
     lockBody(true);
@@ -217,6 +218,8 @@
   function closeOverlay(overlay) {
     if (!overlay) return;
     overlay.classList.remove('is-open');
+    overlay.classList.add('is-closing');
+    setTimeout(() => overlay.classList.remove('is-closing'), 240);
     overlay.setAttribute('aria-hidden', 'true');
     if (!$$('.modal-overlay.is-open').length) lockBody(false);
     const returnFocus = overlay._returnFocus;

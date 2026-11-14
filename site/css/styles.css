@@ -1500,6 +1500,38 @@ html[data-theme="dark"] .paper-shadow {
   font-variant-numeric: tabular-nums;
 }
 
+/* 「↺ 天蝎座」：一键回到作者的星座（只在访客改过星座时出现） */
+
+.horo-reset {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.horo-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.horo-reset:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb) / 0.45);
+  outline-offset: 2px;
+}
+
 .horo-close {
   flex: none;
   display: grid;
@@ -7226,6 +7258,26 @@ kbd {
   background: rgb(22 17 12 / 0.42);
 }
 
+@keyframes mobile-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes mobile-sheet-out {
+  from {
+    transform: none;
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
 .modal.mobile-sheet {
   width: min(390px, 100%);
   max-height: 100vh;
@@ -11470,13 +11522,61 @@ html[data-theme="dark"] .recovery-delete {
     font-size: 8.5px;
   }
 
+  /* 移动端菜单：底部抽屉（内容自适应高度，从底边上滑） */
   .menu-overlay {
-    align-items: stretch;
+    align-items: flex-end;
+    background-color: transparent;
+    opacity: 1;
+    visibility: hidden;
+    transition: background-color 0.32s var(--ease), visibility 0.42s;
+  }
+
+  .menu-overlay.is-open {
+    background-color: rgb(22 17 12 / 0.42);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .menu-overlay.is-closing {
+    opacity: 1;
   }
 
   .modal.mobile-sheet {
     width: 100%;
-    border-left: 0;
+    height: auto;
+    max-height: 84dvh;
+    border: 0;
+    border-radius: 22px 22px 0 0;
+    overflow: hidden;
+    opacity: 1;
+    box-shadow: 0 -18px 50px rgb(0 0 0 / 0.18);
+    transform: translateY(100%);
+  }
+
+  .modal.mobile-sheet::before {
+    content: "";
+    flex: none;
+    width: 38px;
+    height: 4px;
+    margin: 8px auto 2px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+
+  .modal-overlay.is-open .modal.mobile-sheet {
+    transform: none;
+    animation: mobile-sheet-in 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  .modal-overlay.is-closing .modal.mobile-sheet {
+    animation: mobile-sheet-out 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  .mobile-sheet .modal-body {
+    height: auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 22px calc(18px + env(safe-area-inset-bottom));
   }
 
   .modal.settings-modal {

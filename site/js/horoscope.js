@@ -352,6 +352,7 @@ function lineMarkup(data) {
 function cardMarkup(data, { authorSign, pickerOpen }) {
   const isAuthor = data.sign === authorSign;
   const author = signByKey(authorSign);
+  const authorLabel = author ? author.name : '作者的星座';
   return `
     <div class="horo-card-head">
       <span class="horo-card-symbol" aria-hidden="true">${data.symbol}</span>
@@ -360,6 +361,7 @@ function cardMarkup(data, { authorSign, pickerOpen }) {
         <small>${escapeText(data.range)} · ${escapeText(data.element)}</small>
       </span>
       <time class="horo-card-date" datetime="${data.date}">${dateLabel(new Date(`${data.date}T00:00:00`))}</time>
+      ${isAuthor ? '' : `<button type="button" class="horo-reset" data-horo-reset title="恢复为作者的星座（${escapeText(authorLabel)}）">↺ ${escapeText(authorLabel)}</button>`}
       <button type="button" class="horo-close" data-horo-close aria-label="关闭运势卡">✕</button>
     </div>
     <p class="horo-headline">${escapeText(data.headline)}</p>
@@ -376,11 +378,7 @@ function cardMarkup(data, { authorSign, pickerOpen }) {
       <span class="horo-lucky-item">幸运方位<b>${escapeText(data.lucky.direction)}</b></span>
     </div>
     <div class="horo-card-foot">
-      <button type="button" class="horo-switch" data-horo-switch aria-expanded="${pickerOpen ? 'true' : 'false'}">
-        ${isAuthor
-          ? '换成我的星座'
-          : `恢复${author ? escapeText(author.name) : '作者的星座'}`}
-      </button>
+      <button type="button" class="horo-switch" data-horo-switch aria-expanded="${pickerOpen ? 'true' : 'false'}">更换星座</button>
       <span class="horo-foot-note">${isAuthor ? '默认展示站点作者的星座' : '只保存在你的浏览器里'}</span>
     </div>
     ${pickerMarkup(data.sign, pickerOpen)}`;
@@ -450,6 +448,13 @@ export function mountHoroscope(node) {
       focusTarget?.focus({ preventScroll: true });
       return;
     }
+    // 「↺ 天蝎座」：直接切回作者的星座，不打开选择器
+    if (event.target.closest('[data-horo-reset]')) {
+      clearStoredSign();
+      setSign(authorSign, { persist: false });
+      cardEl.querySelector('[data-horo-switch]')?.focus({ preventScroll: true });
+      return;
+    }
     const pick = event.target.closest('[data-horo-pick]');
     if (pick) {
       setSign(pick.dataset.horoPick);
@@ -493,6 +498,15 @@ export function readStoredSign() {
 export function writeStoredSign(sign) {
   try {
     window.localStorage.setItem(STORAGE_SIGN, sign);
+  } catch {
+    /* 隐私模式下忽略 */
+  }
+}
+
+/** 恢复作者的星座 = 清掉本地覆盖，之后站点作者换星座也会跟着变。 */
+export function clearStoredSign() {
+  try {
+    window.localStorage.removeItem(STORAGE_SIGN);
   } catch {
     /* 隐私模式下忽略 */
   }
