@@ -13,7 +13,7 @@ const CACHE_KEY = 'mianxia:weather:v1';
 const LOCATION_KEY = 'mianxia:weather:loc:v1';
 const WEATHER_TTL = 30 * 60 * 1000;
 const LOCATION_TTL = 10 * 24 * 60 * 60 * 1000;
-const REQUEST_TIMEOUT = 9000;
+const REQUEST_TIMEOUT = 16000;
 
 const OPEN_METEO = 'https://api.open-meteo.com/v1/forecast';
 const REVERSE_GEOCODE = 'https://api.bigdatacloud.net/data/reverse-geocode-client';
@@ -118,11 +118,17 @@ function clearLocation() {
   }
 }
 
-function readCache(lat, lon) {
+function readCacheEntry(lat, lon, allowStale = true) {
   const cached = readJson(CACHE_KEY);
-  if (!cached || cached.key !== `${lat},${lon}`) return null;
-  if (Date.now() - Number(cached.at || 0) > WEATHER_TTL) return null;
-  return cached.data || null;
+  if (!cached || cached.key !== lat + "," + lon) return null;
+  const age = Date.now() - Number(cached.at || 0);
+  if (!allowStale && age > WEATHER_TTL) return null;
+  return { data: cached.data || null, stale: age > WEATHER_TTL };
+}
+
+function readCache(lat, lon) {
+  const hit = readCacheEntry(lat, lon, false);
+  return hit && hit.data;
 }
 
 function writeCache(lat, lon, data) {
@@ -202,15 +208,21 @@ async function fetchWeather(place) {
       data = null;
     }
   }
-  if (!data) {
+  // 本地/桌面端有 /api/weather，直连外部会被 CSP 拦；只有静态站才走直连
+  if (!data && isStaticSite()) {
     try {
       data = await fetchWeatherDirect(place);
     } catch {
       data = null;
     }
   }
-  if (data) writeCache(place.lat, place.lon, data);
-  return data;
+  if (data) {
+    writeCache(place.lat, place.lon, data);
+    return data;
+  }
+  // 网络失败时保留上次成功的结果（可能已过期），至少还能显示度数
+  const stale = readCacheEntry(place.lat, place.lon, true);
+  return stale && stale.data ? { ...stale.data, stale: true } : null;
 }
 
 async function reverseGeocode(lat, lon) {
@@ -241,7 +253,7 @@ function withLabel(data, place) {
   return { ...data, city: placeLabel(place) || data.city || '' };
 }
 
-function render(node, data, mode) {
+function render(node, data, mode, options = {}) {
   if (!node || !data) return;
   const iconNode = node.querySelector('[data-weather-icon]');
   const cityNode = node.querySelector('[data-weather-city]');
@@ -263,18 +275,30 @@ function render(node, data, mode) {
   if (toggle) toggle.textContent = mode === 'mine' ? '换成作者的天气' : '换成我这里';
   node.dataset.mode = mode;
   node.classList.add('is-ready');
+  node.classList.toggle('is-stale', Boolean(options.stale));
+  if (options.stale) showNote(node, '天气数据可能不是最新');
+  else hideNote(node);
   node.hidden = false;
 
   const aria = [data.city, data.label, `${data.temperature} 度`].filter(Boolean).join('，');
   node.setAttribute('aria-label', `今日天气：${aria}`);
 }
 
-function showNote(node, text) {
+function hideNote(node) {
+  const note = node.querySelector('[data-weather-note]');
+  if (!note) return;
+  clearTimeout(showNote.timer);
+  note.hidden = true;
+  note.textContent = '';
+}
+
+function showNote(node, text, sticky = false) {
   const note = node.querySelector('[data-weather-note]');
   if (!note) return;
   note.textContent = text;
   note.hidden = false;
   clearTimeout(showNote.timer);
+  if (sticky) return;
   showNote.timer = setTimeout(() => {
     note.hidden = true;
     note.textContent = '';
@@ -307,6 +331,26 @@ function currentPlace(node) {
   return author ? { place: author, mode: 'author' } : null;
 }
 
+let retryTimer = null;
+let retryNode = null;
+
+function cancelRetry() {
+  if (retryTimer) clearTimeout(retryTimer);
+  retryTimer = null;
+  retryNode = null;
+}
+
+function scheduleRetry(node, delay = 60000) {
+  if (retryTimer) clearTimeout(retryTimer);
+  retryNode = node;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    const target = retryNode;
+    retryNode = null;
+    if (target && target.isConnected) refresh(target).catch(() => {});
+  }, delay);
+}
+
 async function refresh(node) {
   const current = currentPlace(node);
   if (!current) {
@@ -314,12 +358,29 @@ async function refresh(node) {
     return;
   }
   const { place, mode } = current;
+  if (!node.classList.contains('is-ready')) {
+    const cached = readCacheEntry(place.lat, place.lon, true);
+    if (cached && cached.data) render(node, withLabel(cached.data, place), mode, { stale: cached.stale });
+  }
   const data = await fetchWeather(place);
   if (!data) {
-    if (!node.classList.contains('is-ready')) node.hidden = true;
+    // 上游不可用时不要隐藏组件：保留城市和「—°」，并自动重试
+    node.hidden = false;
+    node.dataset.mode = mode;
+    node.classList.add('is-stale');
+    node.setAttribute('aria-label', '今日天气：' + (placeLabel(place) || '当前位置') + '，暂时取不到');
+    const toggle = node.querySelector('[data-weather-toggle]');
+    if (toggle) {
+      toggle.disabled = false;
+      toggle.textContent = mode === 'mine' ? '换成作者的天气' : '换成我这里';
+    }
+    showNote(node, '天气暂时取不到，稍后自动重试', true);
+    scheduleRetry(node);
     return;
   }
-  render(node, withLabel(data, place), mode);
+  render(node, withLabel(data, place), mode, { stale: !!data.stale });
+  if (data.stale) scheduleRetry(node, 120000);
+  else cancelRetry();
 }
 
 async function requestMyLocation(node) {
@@ -332,7 +393,6 @@ async function requestMyLocation(node) {
     return;
   }
   setBusy(node, true);
-  // 有些环境（比如权限弹窗一直没人点）不会回调，自己设一个兜底
   let settled = false;
   const watchdog = setTimeout(() => {
     if (settled) return;
@@ -352,22 +412,27 @@ async function requestMyLocation(node) {
         names = await reverseGeocode(lat, lon);
       } else {
         try {
-          const payload = await fetchJson(
-            `/api/weather?lat=${lat}&lon=${lon}`
-          );
+          const payload = await fetchJson('/api/weather?lat=' + lat + '&lon=' + lon);
           names = { city: payload.city || '', province: payload.province || '' };
         } catch {
           names = { city: '', province: '' };
         }
       }
       const place = { lat, lon, city: names.city, province: names.province };
-      saveLocation(place);
       const data = await fetchWeather(place);
       if (!data) {
         showNote(node, '暂时取不到这边的天气');
+        scheduleRetry(node);
         return;
       }
-      render(node, withLabel(data, place), 'mine');
+      // 只有真正取到这里的天气才记住位置，避免下次打开停在一个取不到的地方
+      saveLocation(place);
+      render(node, withLabel(data, place), 'mine', { stale: !!data.stale });
+      if (data.stale) scheduleRetry(node, 120000);
+      else cancelRetry();
+    } catch {
+      showNote(node, '暂时取不到这边的天气');
+      scheduleRetry(node);
     } finally {
       setBusy(node, false);
     }
@@ -400,8 +465,8 @@ export function hydrateWeather(root = document) {
   // 先用上次的结果铺上，避免首屏空白
   const current = currentPlace(node);
   if (current) {
-    const cached = readCache(current.place.lat, current.place.lon);
-    if (cached) render(node, withLabel(cached, current.place), current.mode);
+    const cached = readCacheEntry(current.place.lat, current.place.lon, true);
+    if (cached && cached.data) render(node, withLabel(cached.data, current.place), current.mode, { stale: cached.stale });
   }
 
   if (!activeRequest) {
@@ -409,4 +474,12 @@ export function hydrateWeather(root = document) {
       .catch(() => {})
       .finally(() => { activeRequest = null; });
   }
+  window.addEventListener('online', () => {
+    refresh(node).catch(() => {});
+  }, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && node.classList.contains('is-stale')) {
+      refresh(node).catch(() => {});
+    }
+  });
 }

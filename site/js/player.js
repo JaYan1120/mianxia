@@ -120,7 +120,17 @@
   const fabButton = root.querySelector('[data-music-fab]');
   const closeButton = root.querySelector('[data-music-close]');
   const hideToggle = root.querySelector('[data-music-hide-toggle]');
-  const embedded = Array.isArray(window.__MIANXIA_MUSIC__) ? window.__MIANXIA_MUSIC__ : null;
+  // 静态站的歌单放在 application/json 数据块里：不执行内联脚本，严格 CSP 也不会拦
+  const embedded = (() => {
+    const node = document.getElementById('mianxia-music-data');
+    if (node) {
+      try {
+        const parsed = JSON.parse(node.textContent || '[]');
+        if (Array.isArray(parsed)) return parsed;
+      } catch { /* 回退到旧的内联全局 */ }
+    }
+    return Array.isArray(window.__MIANXIA_MUSIC__) ? window.__MIANXIA_MUSIC__ : null;
+  })();
   const mediaSession = 'mediaSession' in navigator ? navigator.mediaSession : null;
   const mediaAlbum = document.querySelector('meta[property="og:site_name"]')?.content || '眠夏';
 
@@ -667,7 +677,8 @@
       return DEFAULT_VOLUME;
     }
   };
-  const applyAudioVolume = () => { audio.volume = muted ? 0 : currentVolume; };
+  // 静音只切 muted，保留 volume = currentVolume，避免把用户音量记忆清零
+  const applyAudioVolume = () => { audio.muted = muted; audio.volume = currentVolume; };
   const renderMute = () => {
     if (!muteButton) return;
     muteButton.innerHTML = svg(muted ? 'volume-off' : 'volume', 14);
