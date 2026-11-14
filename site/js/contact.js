@@ -63,6 +63,19 @@
 
     const formData = new FormData(form);
     formData.append('access_key', accessKey);
+    // 邮箱是选填的：不填就不发 email 字段，避免通知邮件里出现空的 Reply-To
+    const email = String(formData.get('email') || '').trim();
+    if (!email) {
+      formData.delete('email');
+      formData.append('reply_ok', '不需要回信');
+    } else {
+      formData.append('reply_ok', '可以回信');
+    }
+    if (formData.get('public_ok')) {
+      formData.set('public_ok', '希望公开到留言簿');
+    } else {
+      formData.delete('public_ok');
+    }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20000);
