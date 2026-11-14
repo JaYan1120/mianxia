@@ -6123,6 +6123,225 @@ html[data-theme="dark"] .article-body mark[data-highlight="gray"] {
   background: var(--accent);
 }
 
+/* ==========================================================================
+   移动端吸顶目录条（≤1060 取代右侧栏）
+   ========================================================================== */
+
+.toc-sticky {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 79;
+  display: none;
+}
+
+.toc-sticky.is-shown {
+  display: block;
+}
+
+.toc-sticky-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: rgb(247 241 231 / 0.93);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  animation: toc-bar-in 0.16s var(--ease);
+}
+
+html[data-theme="dark"] .toc-sticky-bar {
+  background: rgb(19 18 16 / 0.92);
+}
+
+.toc-sticky-bar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.toc-sticky-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  opacity: 0.62;
+}
+
+.toc-sticky-label {
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.toc-sticky-sep {
+  flex: none;
+  width: 1px;
+  height: 13px;
+  background: var(--line-strong);
+}
+
+.toc-sticky-now {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-reading);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.toc-sticky-count {
+  flex: none;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.toc-sticky-chev {
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--ink-soft);
+  transition: transform 0.2s var(--ease);
+}
+
+.toc-sticky.is-open .toc-sticky-chev {
+  transform: rotate(180deg);
+}
+
+.toc-sticky.is-open .toc-sticky-bar {
+  background: var(--paper);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.toc-sticky-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgb(25 19 14 / 0.26);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: toc-mask-in 0.18s var(--ease);
+}
+
+.toc-sticky-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: none;
+  max-height: 58dvh;
+  overflow-y: auto;
+  padding: 8px 12px 14px;
+  border-radius: 0 0 18px 18px;
+  background: var(--paper);
+  box-shadow: 0 20px 44px rgb(30 20 10 / 0.18);
+  animation: toc-panel-in 0.18s var(--ease);
+}
+
+.toc-sticky.is-open .toc-sticky-panel {
+  display: block;
+}
+
+.toc-sticky-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-sticky-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  color: var(--ink-soft);
+  font-family: var(--font-reading);
+  font-size: 14px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.toc-sticky-link i {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.toc-sticky-link.toc-h3 {
+  padding-left: 26px;
+}
+
+.toc-sticky-link:hover,
+.toc-sticky-link.is-active {
+  color: var(--ink);
+}
+
+.toc-sticky-link.is-active {
+  background: rgb(var(--accent-rgb) / 0.07);
+}
+
+.toc-sticky-link.is-active i {
+  background: var(--accent);
+}
+
+html.toc-open,
+html.toc-open body,
+body.toc-open {
+  overflow: hidden;
+}
+
+@keyframes toc-bar-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes toc-mask-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes toc-panel-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (min-width: 1061px) {
+  .toc-sticky {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-sticky-bar,
+  .toc-sticky-mask,
+  .toc-sticky-panel {
+    animation: none;
+  }
+
+  .toc-sticky-chev {
+    transition: none;
+  }
+}
+
 .aside-card {
   padding: 18px;
   border: 1px solid var(--line);
@@ -12505,6 +12724,16 @@ html[data-theme="dark"] .recovery-delete {
 #article-body h4,
 #article-body [id] {
   scroll-margin-top: calc(var(--header-h) + 28px);
+}
+
+/* 窄屏多了 40px 吸顶目录条，锚点要躲开它 */
+@media (max-width: 1060px) {
+  #article-body h2,
+  #article-body h3,
+  #article-body h4,
+  #article-body [id] {
+    scroll-margin-top: calc(var(--header-h) + 68px);
+  }
 }
 
 #article-body pre {

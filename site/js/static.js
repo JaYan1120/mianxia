@@ -500,9 +500,12 @@
         if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
       });
     });
+    const tocBarCleanup = window.MianxiaTocBar ? window.MianxiaTocBar.setup() : null;
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (observer) observer.disconnect();
+      if (typeof tocBarCleanup === 'function') tocBarCleanup();
     };
   }
 
