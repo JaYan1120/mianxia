@@ -467,7 +467,12 @@
         }
       });
     }, { rootMargin: '0px 0px -40px 0px', threshold: 0.04 });
-    items.forEach((item) => observer.observe(item));
+    // 比视口还高的元素（例如长文章正文）永远到不了阈值，直接显示
+    const tallHeight = window.innerHeight * 1.2;
+    items.forEach((item) => {
+      if (item.getBoundingClientRect().height > tallHeight) item.classList.add('is-visible');
+      else observer.observe(item);
+    });
     return () => observer.disconnect();
   }
 
