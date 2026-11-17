@@ -529,7 +529,7 @@
   }
 
   function initAlmanac() {
-    if (!$('[data-almanac]')) return;
+    if (!$('[data-almanac]') || $('[data-almanac-static]')) return;
     import('./almanac.js')
       .then((mod) => mod.hydrateAlmanac(document))
       .catch(() => { /* 加载失败时保留原来的「星期X · 宜记录」 */ });
@@ -701,7 +701,73 @@
     });
   }
 
+  var SKIN_KEY = 'mianxia:skin';
+  var SKIN_IDS = ['paper', 'glass', 'dusk', 'moon', 'bloom'];
+
+  function currentSkin() {
+    var value = document.documentElement.dataset.skin;
+    return SKIN_IDS.indexOf(value) >= 0 ? value : 'paper';
+  }
+
+  function applySkin(id, persist) {
+    var next = SKIN_IDS.indexOf(id) >= 0 ? id : 'paper';
+    if (persist) {
+      try { localStorage.setItem(SKIN_KEY, next); } catch (e) { /* ignore */ }
+    }
+    document.documentElement.dataset.skin = next;
+  }
+
+  function paintSkinMenu() {
+    var panel = document.getElementById('skin-popover');
+    if (!panel || !window.MianxiaSkins) return;
+    var grid = panel.querySelector('.skin-grid');
+    if (!grid) return;
+    var now = window.MianxiaSkins.current();
+    grid.innerHTML = window.MianxiaSkins.cardsMarkup(now.skin, now.theme);
+  }
+
+  function closeSkinMenu() {
+    var panel = document.getElementById('skin-popover');
+    var toggle = document.querySelector('.skin-toggle');
+    if (panel) panel.hidden = true;
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function initSkin() {
+    var stored = null;
+    try { stored = localStorage.getItem(SKIN_KEY); } catch (e) { /* ignore */ }
+    applySkin(stored || 'paper');
+    paintSkinMenu();
+    document.addEventListener('click', function (event) {
+      var path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+      var inLayer = path.some(function (node) {
+        return node instanceof Element && (node.classList.contains('skin-popover') || node.classList.contains('skin-toggle'));
+      });
+      var panel = document.getElementById('skin-popover');
+      var toggle = document.querySelector('.skin-toggle');
+      if (panel && !panel.hidden && !inLayer) closeSkinMenu();
+      var pick = event.target.closest('[data-skin-pick]');
+      if (pick) {
+        event.preventDefault();
+        applySkin(pick.dataset.skinPick, true);
+        applyTheme(pick.dataset.skinTheme === 'dark' ? 'dark' : 'light', true);
+        paintSkinMenu();
+        closeSkinMenu();
+        return;
+      }
+      var trigger = event.target.closest('[data-static-skin]');
+      if (trigger && panel) {
+        var open = panel.hidden;
+        if (open) paintSkinMenu();
+        panel.hidden = !open;
+        if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+    });
+    window.addEventListener('mianxia:theme', function () { paintSkinMenu(); });
+  }
+
   initTheme();
+  initSkin();
   initHeader();
   initOverlays();
   initSearch();

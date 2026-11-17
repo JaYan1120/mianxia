@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="light" data-initial-theme="light" data-font="serif" data-bg-type="preset" style="--accent:#b45138;--accent-rgb:180 81 56;--on-accent:#fff8ee;--page-width:1340px;--bg-overlay:0.5;--bg-blur:0px;--bg-position:center">
+<html lang="zh-CN" data-theme="light" data-skin="paper" data-initial-skin="glass" data-initial-theme="light" data-font="serif" data-bg-type="preset" style="--accent:#b45138;--accent-rgb:180 81 56;--on-accent:#fff8ee;--page-width:1340px;--bg-overlay:0.5;--bg-blur:0px;--bg-position:center">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -27,6 +27,7 @@
   <script type="application/json" id="mianxia-music-data">[{"id":"mwetwlb7ad2e09","title":"陪你度过漫长岁月","artist":"陈奕迅","url":"../uploads/mwetwgtk-8cc80cd03c.mp3","createdAt":"2026-11-13T10:23:20.803Z"},{"id":"mwetww3595dfb3","title":"十面埋伏","artist":"陈奕迅","url":"../uploads/mwetwp3i-408eb3d0b8.mp3","createdAt":"2026-11-13T10:23:34.769Z"},{"id":"mwetx39f62eaac","title":"为你我受冷风吹","artist":"林忆莲","url":"../uploads/mwetwytx-3e15662191.mp3","createdAt":"2026-11-13T10:23:44.067Z"},{"id":"mwcf6uxk824e43","title":"我什么都没有","artist":"陈奕迅","url":"../uploads/mwcf6nei-5e99178472.mp3","createdAt":"2026-11-11T17:55:53.240Z"},{"id":"mwetxcxz0dcd74","title":"真夜中のドアStay With Me (シングルver.)","artist":"松原みき","url":"../uploads/mwetx7kk-840d7ea535.mp3","createdAt":"2026-11-13T10:23:56.615Z"},{"id":"mwetxjhoc70b61","title":"最好的我","artist":"房祖名&龚芝怡","url":"../uploads/mwetxfeq-d14fbb2808.mp3","createdAt":"2026-11-13T10:24:05.100Z"},{"id":"mwce11cz0ec2d4","title":"最后派对","artist":"陈奕迅","url":"../uploads/mwce0rnk-4d88642298.mp3","createdAt":"2026-11-11T17:23:22.019Z"},{"id":"mwetwckmd07c2a","title":"そばにいるね","artist":"青山テルマ&SoulJa","url":"../uploads/mwetw78w-9f93033859.mp3","createdAt":"2026-11-13T10:23:09.478Z"}]</script>
   <script src="../js/theme-init.js"></script>
   <link rel="stylesheet" href="../css/styles.css">
+  <script defer src="../js/skins.js"></script>
   <script defer src="../js/toc-bar.js"></script>
   <script defer src="../js/static.js"></script>
   <script defer src="../js/player.js"></script>
@@ -53,6 +54,11 @@
       <nav class="main-nav" aria-label="主导航"><a href=".././" class="nav-link " >首页</a><a href="../archive/" class="nav-link " >归档</a><a href="../guestbook/" class="nav-link is-active" aria-current="page">留言</a><a href="../about/" class="nav-link " >关于</a></nav>
       <div class="header-actions">
         <button type="button" class="icon-button" data-static-search aria-label="搜索笔记" title="搜索（Ctrl K）"><svg class="icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        <button type="button" class="icon-button skin-toggle" data-static-skin aria-label="切换主题" aria-expanded="false" aria-controls="skin-popover" title="切换主题"><svg class="icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8Z"/></svg></button>
+        <div class="skin-popover" id="skin-popover" hidden>
+          <div class="skin-popover-head"><strong>主题</strong><small>只影响这个浏览器</small></div>
+          <div class="skin-grid"></div>
+        </div>
         <button type="button" class="icon-button theme-toggle" data-static-theme aria-label="切换深浅色" title="切换深浅色">
           <span class="theme-icon theme-icon-sun"><svg class="icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg></span>
           <span class="theme-icon theme-icon-moon"><svg class="icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg></span>
