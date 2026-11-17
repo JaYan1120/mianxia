@@ -736,7 +736,7 @@
   function initSkin() {
     var stored = null;
     try { stored = localStorage.getItem(SKIN_KEY); } catch (e) { /* ignore */ }
-    applySkin(stored || 'paper');
+    applySkin(stored || document.documentElement.dataset.initialSkin || 'paper');
     paintSkinMenu();
     document.addEventListener('click', function (event) {
       var path = typeof event.composedPath === 'function' ? event.composedPath() : [];
