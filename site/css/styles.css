@@ -13369,6 +13369,24 @@ html[data-theme="dark"] .skin-popover { background: rgb(26 25 29 / 0.97); }
   .settings-skin-grid .skin-thumb { height: 62px; }
 }
 
+/* ---- 窄屏登录态顶栏压缩：登录后头栏是「搜索 / 主题 / 深浅 / 写笔记 / 头像」5 个元素，
+   玻璃胶囊在 390 以下会被撑到贴边甚至溢出。这里只缩尺寸与间距，不减入口。 ---- */
+@media (max-width: 430px) {
+  .header-inner { gap: 6px; }
+  .mobile-menu-trigger { flex: none; }
+  .header-actions { gap: 0; }
+  .header-write { width: 34px; height: 34px; margin-left: 2px; }
+  .account { margin-left: 2px; }
+  .account-trigger { padding: 0; gap: 2px; }
+}
+
+@media (max-width: 380px) {
+  .brand { gap: 6px; }
+  .brand-seal { width: 26px; height: 26px; }
+  .brand-name { font-size: 15px; letter-spacing: 0.05em; }
+}
+
+
 
 main:focus {
   outline: none;
