@@ -157,25 +157,29 @@ async function loadFromStaticYear(date) {
 }
 
 async function loadAlmanac(date) {
-  // 1. 本地服务（桌面端 / 本地预览）：服务端已按整年算好，直接取当天那条
-  try {
-    const res = await fetchJson(`/api/almanac?date=${encodeURIComponent(date)}`);
-    if (res.ok) {
-      const data = normalize(await res.json());
-      if (data) return data;
-    } else if (/json/i.test(res.headers.get('content-type') || '')) {
-      // 本地服务在但拒绝了请求：不再直连外部，避免无意义的外网请求和 CSP 报错
-      return null;
+  // 静态导出（GitHub Pages）：构建时已按年生成整月数据，直接读；不探测 /api/almanac，
+  // 否则读者端每次首屏都会打一次必然 404 的请求，并在控制台留一条报错。
+  if (!isStaticSite()) {
+    // 1. 本地服务（桌面端 / 本地预览）：服务端已按整年算好，直接取当天那条
+    try {
+      const res = await fetchJson(`/api/almanac?date=${encodeURIComponent(date)}`);
+      if (res.ok) {
+        const data = normalize(await res.json());
+        if (data) return data;
+      } else if (/json/i.test(res.headers.get('content-type') || '')) {
+        // 本地服务在但拒绝了请求：不再直连外部，避免无意义的外网请求和 CSP 报错
+        return null;
+      }
+    } catch {
+      /* 没有本地服务，继续 */
     }
-  } catch {
-    /* 没有本地服务，继续 */
+    // 动态站走到这里说明服务端有响应但没给出可用数据，直连外部只会撞 CSP，直接放弃。
+    return null;
   }
-  // 2. 静态导出（GitHub Pages）：读构建时生成的整月数据，离线也能用
+  // 2. 静态站：读构建时生成的整月数据，离线也能用
   const fromYear = await loadFromStaticYear(date);
   if (fromYear) return fromYear;
   // 3. 最后一招：直连外部老黄历（只认今天，用于跨年还没重新生成的情况）
-  // 动态站（桌面端/本地服务）走到这里说明服务端有响应但没给出可用数据，直连外部只会撞 CSP，直接放弃。
-  if (!isStaticSite()) return null;
   try {
     const res = await fetchJson(ENDPOINT);
     if (!res.ok) return null;
