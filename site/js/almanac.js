@@ -174,6 +174,8 @@ async function loadAlmanac(date) {
   const fromYear = await loadFromStaticYear(date);
   if (fromYear) return fromYear;
   // 3. 最后一招：直连外部老黄历（只认今天，用于跨年还没重新生成的情况）
+  // 动态站（桌面端/本地服务）走到这里说明服务端有响应但没给出可用数据，直连外部只会撞 CSP，直接放弃。
+  if (!isStaticSite()) return null;
   try {
     const res = await fetchJson(ENDPOINT);
     if (!res.ok) return null;
